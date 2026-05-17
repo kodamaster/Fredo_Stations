@@ -10,14 +10,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-      - uses: android-actions/setup-android@v3
-      - uses: gradle/actions/setup-gradle@v3
-      - run: chmod +x gradlew
-      - run: ./gradlew assembleRelease
+
+      - name: Install Android SDK
+        run: |
+          sudo apt-get install -y wget unzip
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdtools.zip
+          mkdir -p $HOME/android-sdk/cmdline-tools
+          unzip -q cmdtools.zip -d $HOME/android-sdk/cmdline-tools
+          mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
+          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "$HOME/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          echo "$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Generate Gradle Wrapper
+        run: |
+          wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip -O gradle.zip
+          unzip -q gradle.zip
+          ./gradle-8.4/bin/gradle wrapper --gradle-version 8.4
+          chmod +x gradlew
+
+      - name: Build APK
+        run: ./gradlew assembleRelease
+
       - uses: actions/upload-artifact@v4
         with:
           name: velin-dashboard
