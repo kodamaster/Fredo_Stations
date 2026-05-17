@@ -6,23 +6,9 @@
 <title>Vel'in — Flotte</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{
-  --bg:#0d0f14;--surface:#13161d;--surface2:#1a1e28;
-  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
-  --text:#f0f2f7;--muted:#6b7280;
-  --accent:#5b9bd5;--accent-dim:rgba(91,155,213,.15);
-  --green:#22c55e;--green-dim:rgba(34,197,94,.12);
-  --amber:#f59e0b;--amber-dim:rgba(245,158,11,.12);
-  --red:#ef4444;--red-dim:rgba(239,68,68,.12);
-}
+:root{--bg:#0d0f14;--surface:#13161d;--surface2:#1a1e28;--border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);--text:#f0f2f7;--muted:#6b7280;--accent:#5b9bd5;--accent-dim:rgba(91,155,213,.15);--green:#22c55e;--green-dim:rgba(34,197,94,.12);--amber:#f59e0b;--amber-dim:rgba(245,158,11,.12);--red:#ef4444;--red-dim:rgba(239,68,68,.12)}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow-x:hidden}
-.header{
-  position:sticky;top:0;z-index:100;
-  background:rgba(13,15,20,.97);
-  border-bottom:1px solid var(--border);
-  padding:40px 16px 12px;
-  display:flex;align-items:center;justify-content:space-between;
-}
+.header{position:sticky;top:0;z-index:100;background:rgba(13,15,20,.97);border-bottom:1px solid var(--border);padding:44px 16px 12px;display:flex;align-items:center;justify-content:space-between}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 2s ease-in-out infinite;flex-shrink:0;margin-right:10px}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 .title{font-size:17px;font-weight:700;letter-spacing:-.3px;flex:1}
@@ -31,14 +17,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .refresh-btn:active{background:var(--accent-dim)}
 .refresh-btn svg{stroke:var(--accent);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;transition:transform .6s}
 .refresh-btn.spinning svg{transform:rotate(360deg)}
-
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 12px 0}
 .stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;position:relative;overflow:hidden}
 .stat::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),transparent)}
 .stat-val{font-size:26px;font-weight:800;letter-spacing:-1px;line-height:1}
 .stat-lbl{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.4px}
 .last-update{text-align:center;font-size:11px;color:var(--muted);padding:8px 12px}
-
 .stations{padding:4px 12px 40px;display:flex;flex-direction:column;gap:8px}
 .station{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
 .station.dashed{border-style:dashed}
@@ -81,7 +65,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 </style>
 </head>
 <body>
-
 <div class="header">
   <div class="dot"></div>
   <div class="title">Vel'<span>in</span> — Flotte</div>
@@ -92,18 +75,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
     </svg>
   </div>
 </div>
-
 <div id="content">
-  <div class="loader">
-    <div class="spinner"></div>
-    <div class="loader-txt">Chargement...</div>
-  </div>
+  <div class="loader"><div class="spinner"></div><div class="loader-txt">Chargement...</div></div>
 </div>
 
 <script>
 const BACKOFFICE = 'https://backoffice-fredo-prod.apnl.info';
 const CREDS = { _username: 'client+grandcalais@fredo.fr', _password: 'Ic3nL6ciuAG7' };
-
 const CENTROIDS = {
   "2887":{ nom:"Gare",           places:9, lat:50.953309, lng:1.851010 },
   "2888":{ nom:"Nation",         places:6, lat:50.945382, lng:1.867345 },
@@ -112,7 +90,6 @@ const CENTROIDS = {
   "2891":{ nom:"Université",     places:9, lat:50.952378, lng:1.879473 },
   "2893":{ nom:"Milieu de Digue",places:6, lat:50.962880, lng:1.835723 }
 };
-
 const RADIUS = 200;
 let openState = {};
 
@@ -121,7 +98,6 @@ function haversine(lat1,lng1,lat2,lng2){
   const a=Math.sin(dLat/2)**2+Math.cos(r(lat1))*Math.cos(r(lat2))*Math.sin(dLng/2)**2;
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
-
 function assign(bikes){
   const counts={};Object.keys(CENTROIDS).forEach(id=>counts[id]=[]);const outside=[];
   Object.entries(bikes).forEach(([coord,ids])=>{
@@ -137,18 +113,37 @@ function assign(bikes){
 }
 
 async function fetchData(){
-  const form=new URLSearchParams(CREDS);
-  await fetch(BACKOFFICE+'/log-in',{
-    method:'POST',body:form,credentials:'include',
-    headers:{'Content-Type':'application/x-www-form-urlencoded'},redirect:'follow'
+  // Etape 1 : login
+  const form = new URLSearchParams(CREDS);
+  const loginResp = await fetch(BACKOFFICE+'/log-in', {
+    method:'POST', body:form, credentials:'include',
+    headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    redirect:'follow'
   });
-  const r=await fetch(BACKOFFICE+'/clientZones/',{
+
+  // Etape 2 : récupérer la page zones avec cookie
+  const resp = await fetch(BACKOFFICE+'/clientZones/', {
     credentials:'include',
-    headers:{'X-Requested-With':'XMLHttpRequest'}
+    headers:{
+      'X-Requested-With':'XMLHttpRequest',
+      'Accept':'text/html,application/xhtml+xml'
+    }
   });
-  const t=await r.text();
-  const m=t.match(/namesByCoord\s*=\s*(\{[^;]+\});/);
-  if(!m) throw new Error('Données introuvables.');
+
+  if(!resp.ok) throw new Error('Erreur HTTP ' + resp.status);
+  const html = await resp.text();
+
+  // Chercher namesByCoord dans le HTML/JS retourné
+  let m = html.match(/namesByCoord\s*=\s*(\{[\s\S]*?\});/);
+  if(!m) {
+    // Chercher dans le JSON encapsulé
+    try {
+      const json = JSON.parse(html);
+      const inner = json.html || '';
+      m = inner.match(/namesByCoord\s*=\s*(\{[\s\S]*?\});/);
+    } catch(e) {}
+  }
+  if(!m) throw new Error('Données introuvables — essayez de rafraîchir.');
   return JSON.parse(m[1]);
 }
 
@@ -163,73 +158,39 @@ function render(bikes){
   const total=Object.values(counts).reduce((s,v)=>s+v.length,0)+outside.length;
   const enStation=Object.values(counts).reduce((s,v)=>s+v.length,0);
   const now=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  const rows=Object.entries(CENTROIDS).map(([id,z])=>({id,nom:z.nom,places:z.places,bikes:counts[id]})).sort((a,b)=>b.bikes.length-a.bikes.length);
 
-  const rows=Object.entries(CENTROIDS)
-    .map(([id,z])=>({id,nom:z.nom,places:z.places,bikes:counts[id]}))
-    .sort((a,b)=>b.bikes.length-a.bikes.length);
-
-  let html=`
-    <div class="stats">
-      <div class="stat"><div class="stat-val">${total}</div><div class="stat-lbl">Total</div></div>
-      <div class="stat"><div class="stat-val">${enStation}</div><div class="stat-lbl">En station</div></div>
-      <div class="stat"><div class="stat-val">${outside.length}</div><div class="stat-lbl">Hors zone</div></div>
-    </div>
-    <div class="last-update">Mis à jour à ${now}</div>
-    <div class="stations">`;
+  let html=`<div class="stats">
+    <div class="stat"><div class="stat-val">${total}</div><div class="stat-lbl">Total</div></div>
+    <div class="stat"><div class="stat-val">${enStation}</div><div class="stat-lbl">En station</div></div>
+    <div class="stat"><div class="stat-val">${outside.length}</div><div class="stat-lbl">Hors zone</div></div>
+  </div><div class="last-update">Mis à jour à ${now}</div><div class="stations">`;
 
   rows.forEach(r=>{
     const pct=Math.round(r.bikes.length/r.places*100);
     const barColor=pct>=50?'var(--green)':pct>0?'var(--amber)':'var(--red)';
-    const badge=r.bikes.length===0
-      ?`<span class="badge empty">vide</span>`
-      :r.bikes.length<=r.places*.3
-      ?`<span class="badge low">faible</span>`
-      :`<span class="badge ok">dispo</span>`;
-    const pills=r.bikes.length>0
-      ?r.bikes.map(b=>`<span class="pill">#${b}</span>`).join('')
-      :`<span class="empty-msg">Aucun vélo</span>`;
-    html+=`
-      <div class="station">
-        <div class="sh" onclick="toggle('${r.id}')">
-          <div class="sl">
-            <div class="icon"><svg width="20" height="20" viewBox="0 0 24 24"><circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h3.5"/></svg></div>
-            <div class="sinfo"><div class="sname">${r.nom}</div><div class="smeta">${r.places} places</div></div>
-          </div>
-          <div class="sr">
-            <div class="count-box"><div class="cnum">${r.bikes.length}</div><div class="clbl">vélos</div></div>
-            ${badge}
-            <svg id="chev-${r.id}" class="chev${openState[r.id]?' open':''}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-          </div>
-        </div>
-        <div class="sbody${openState[r.id]?' open':''}" id="body-${r.id}">
-          <div class="bar-row"><div class="bar-bg"><div class="bar-fill" style="width:${Math.min(pct,100)}%;background:${barColor}"></div></div><span class="bar-pct">${pct}%</span></div>
-          <div class="blabel">Numéros des vélos</div>
-          <div class="bgrid">${pills}</div>
-        </div>
-      </div>`;
+    const badge=r.bikes.length===0?`<span class="badge empty">vide</span>`:r.bikes.length<=r.places*.3?`<span class="badge low">faible</span>`:`<span class="badge ok">dispo</span>`;
+    const pills=r.bikes.length>0?r.bikes.map(b=>`<span class="pill">#${b}</span>`).join(''):`<span class="empty-msg">Aucun vélo</span>`;
+    html+=`<div class="station"><div class="sh" onclick="toggle('${r.id}')">
+      <div class="sl"><div class="icon"><svg width="20" height="20" viewBox="0 0 24 24"><circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h3.5"/></svg></div>
+      <div class="sinfo"><div class="sname">${r.nom}</div><div class="smeta">${r.places} places</div></div></div>
+      <div class="sr"><div class="count-box"><div class="cnum">${r.bikes.length}</div><div class="clbl">vélos</div></div>${badge}
+      <svg id="chev-${r.id}" class="chev${openState[r.id]?' open':''}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div></div>
+      <div class="sbody${openState[r.id]?' open':''}" id="body-${r.id}">
+      <div class="bar-row"><div class="bar-bg"><div class="bar-fill" style="width:${Math.min(pct,100)}%;background:${barColor}"></div></div><span class="bar-pct">${pct}%</span></div>
+      <div class="blabel">Numéros des vélos</div><div class="bgrid">${pills}</div></div></div>`;
   });
 
   if(outside.length>0){
-    html+=`
-      <div class="station dashed">
-        <div class="sh" onclick="toggle('outside')">
-          <div class="sl">
-            <div class="icon"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg></div>
-            <div class="sinfo"><div class="sname" style="color:var(--muted)">Hors station</div><div class="smeta">non rattachés</div></div>
-          </div>
-          <div class="sr">
-            <div class="count-box"><div class="cnum" style="color:var(--muted)">${outside.length}</div><div class="clbl">vélos</div></div>
-            <span class="badge blue">hors zone</span>
-            <svg id="chev-outside" class="chev${openState['outside']?' open':''}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-          </div>
-        </div>
-        <div class="sbody${openState['outside']?' open':''}" id="body-outside">
-          <div class="blabel">Numéros des vélos</div>
-          <div class="bgrid">${outside.map(b=>`<span class="pill">#${b}</span>`).join('')}</div>
-        </div>
-      </div>`;
+    html+=`<div class="station dashed"><div class="sh" onclick="toggle('outside')">
+      <div class="sl"><div class="icon"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg></div>
+      <div class="sinfo"><div class="sname" style="color:var(--muted)">Hors station</div><div class="smeta">non rattachés</div></div></div>
+      <div class="sr"><div class="count-box"><div class="cnum" style="color:var(--muted)">${outside.length}</div><div class="clbl">vélos</div></div>
+      <span class="badge blue">hors zone</span>
+      <svg id="chev-outside" class="chev${openState['outside']?' open':''}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div></div>
+      <div class="sbody${openState['outside']?' open':''}" id="body-outside">
+      <div class="blabel">Numéros des vélos</div><div class="bgrid">${outside.map(b=>`<span class="pill">#${b}</span>`).join('')}</div></div></div>`;
   }
-
   html+=`</div>`;
   document.getElementById('content').innerHTML=html;
 }
@@ -244,18 +205,13 @@ async function loadData(){
     const bikes=await fetchData();
     render(bikes);
   }catch(err){
-    document.getElementById('content').innerHTML=`
-      <div class="error">
-        <strong>Erreur de connexion</strong>
-        ${err.message}<br><br>Vérifiez votre connexion internet.
-        <button class="retry-btn" onclick="loadData()">↻ Réessayer</button>
-      </div>`;
+    document.getElementById('content').innerHTML=`<div class="error"><strong>Erreur de connexion</strong>${err.message}<button class="retry-btn" onclick="loadData()">↻ Réessayer</button></div>`;
   }
   setTimeout(()=>btn.classList.remove('spinning'),600);
 }
 
 loadData();
-setInterval(loadData, 120000);
+setInterval(loadData,120000);
 </script>
 </body>
 </html>
