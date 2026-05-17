@@ -76,6 +76,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
   </div>
 </div>
 <div id="content">
+  <div id="debug" style="padding:8px;font-size:10px;color:#6b7280;font-family:monospace;word-break:break-all"></div>
   <div class="loader"><div class="spinner"></div><div class="loader-txt">Chargement...</div></div>
 </div>
 
@@ -113,51 +114,55 @@ function assign(bikes){
 }
 
 async function fetchData(){
-  // Etape 1 : récupérer la page de login pour avoir le token CSRF
-  const loginPage = await fetch('https://backoffice-fredo-prod.apnl.info/log-in', {
-    credentials: 'include',
-    headers: { 'User-Agent': 'Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 Chrome/91.0 Mobile Safari/537.36' }
-  });
-  const loginHtml = await loginPage.text();
+  try {
+    // Etape 1 : page login + CSRF
+    const loginPage = await fetch('https://backoffice-fredo-prod.apnl.info/log-in', {
+      credentials: 'include'
+    });
+    const loginHtml = await loginPage.text();
+    const tokenMatch = loginHtml.match(/name="_csrf_token"\s+value="([^"]+)"/);
+    const csrfToken = tokenMatch ? tokenMatch[1] : '';
 
-  // Extraire le token CSRF
-  const tokenMatch = loginHtml.match(/name="_csrf_token"\s+value="([^"]+)"/);
-  const csrfToken = tokenMatch ? tokenMatch[1] : '';
+    // Etape 2 : login
+    const form = new URLSearchParams();
+    form.append('_username', 'client+grandcalais@fredo.fr');
+    form.append('_password', 'Ic3nL6ciuAG7');
+    form.append('_csrf_token', csrfToken);
 
-  // Etape 2 : login avec le token CSRF
-  const form = new URLSearchParams();
-  form.append('_username', 'client+grandcalais@fredo.fr');
-  form.append('_password', 'Ic3nL6ciuAG7');
-  form.append('_csrf_token', csrfToken);
+    const loginResp = await fetch('https://backoffice-fredo-prod.apnl.info/log-in', {
+      method: 'POST', body: form, credentials: 'include',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      redirect: 'follow'
+    });
 
-  await fetch('https://backoffice-fredo-prod.apnl.info/log-in', {
-    method: 'POST',
-    body: form,
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    redirect: 'follow'
-  });
+    // Etape 3 : zones
+    const resp = await fetch('https://backoffice-fredo-prod.apnl.info/clientZones/', {
+      credentials: 'include',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
 
-  // Etape 3 : récupérer la page des zones
-  const resp = await fetch('https://backoffice-fredo-prod.apnl.info/clientZones/', {
-    credentials: 'include',
-    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-  });
+    const html = await resp.text();
 
-  if(!resp.ok) throw new Error('Erreur HTTP ' + resp.status);
-  const html = await resp.text();
+    // Debug : afficher les 200 premiers caractères
+    const debugEl = document.getElementById('debug');
+    if(debugEl) debugEl.textContent = 'Status: ' + resp.status + ' | CSRF: ' + (csrfToken ? 'OK' : 'NON') + ' | HTML debut: ' + html.substring(0, 200);
 
-  // Chercher namesByCoord
-  let m = html.match(/namesByCoord\s*=\s*(\{[\s\S]*?\});/);
-  if(!m){
-    try {
-      const json = JSON.parse(html);
-      m = (json.html||'').match(/namesByCoord\s*=\s*(\{[\s\S]*?\});/);
-    } catch(e){}
+    let m = html.match(/namesByCoord\s*=\s*(\{[\s\S]*?\});/);
+    if(!m){
+      try {
+        const json = JSON.parse(html);
+        m = (json.html||'').match(/namesByCoord\s*=\s*(\{[\s\S]*?\});/);
+      } catch(e){}
+    }
+    if(!m) throw new Error('namesByCoord introuvable. Status=' + resp.status);
+    return JSON.parse(m[1]);
+
+  } catch(err) {
+    throw err;
   }
-  if(!m) throw new Error('Données introuvables — ' + resp.status + ' ' + html.substring(0,100));
-  return JSON.parse(m[1]);
 }
+
+  
 
   if(!resp.ok) throw new Error('Erreur HTTP ' + resp.status);
   const html = await resp.text();
