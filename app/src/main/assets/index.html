@@ -114,16 +114,28 @@ function assign(bikes){
 }
 
 async function fetchData(){
-  try {
-    // Etape 1 : page login + CSRF
+  // Afficher immédiatement qu'on commence
+  const dbg = document.getElementById('debug');
+  if(dbg) dbg.textContent = 'Démarrage...';
+
+  // Timeout de 10 secondes
+  const timeout = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error('Timeout 10s — réseau inaccessible')), 10000)
+  );
+
+  const work = async () => {
+    if(dbg) dbg.textContent = 'Fetching login page...';
+
     const loginPage = await fetch('https://backoffice-fredo-prod.apnl.info/log-in', {
       credentials: 'include'
     });
+    if(dbg) dbg.textContent = 'Login page: ' + loginPage.status;
+
     const loginHtml = await loginPage.text();
     const tokenMatch = loginHtml.match(/name="_csrf_token"\s+value="([^"]+)"/);
     const csrfToken = tokenMatch ? tokenMatch[1] : '';
+    if(dbg) dbg.textContent = 'CSRF: ' + (csrfToken || 'NON TROUVE');
 
-    // Etape 2 : login
     const form = new URLSearchParams();
     form.append('_username', 'client+grandcalais@fredo.fr');
     form.append('_password', 'Ic3nL6ciuAG7');
@@ -134,18 +146,16 @@ async function fetchData(){
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       redirect: 'follow'
     });
+    if(dbg) dbg.textContent = 'Login resp: ' + loginResp.status + ' url: ' + loginResp.url;
 
-    // Etape 3 : zones
     const resp = await fetch('https://backoffice-fredo-prod.apnl.info/clientZones/', {
       credentials: 'include',
       headers: { 'X-Requested-With': 'XMLHttpRequest' }
     });
+    if(dbg) dbg.textContent = 'Zones: ' + resp.status;
 
     const html = await resp.text();
-
-    // Debug : afficher les 200 premiers caractères
-    const debugEl = document.getElementById('debug');
-    if(debugEl) debugEl.textContent = 'Status: ' + resp.status + ' | CSRF: ' + (csrfToken ? 'OK' : 'NON') + ' | HTML debut: ' + html.substring(0, 200);
+    if(dbg) dbg.textContent = 'HTML recu: ' + html.length + ' chars | debut: ' + html.substring(0,100);
 
     let m = html.match(/namesByCoord\s*=\s*(\{[\s\S]*?\});/);
     if(!m){
@@ -154,12 +164,11 @@ async function fetchData(){
         m = (json.html||'').match(/namesByCoord\s*=\s*(\{[\s\S]*?\});/);
       } catch(e){}
     }
-    if(!m) throw new Error('namesByCoord introuvable. Status=' + resp.status);
+    if(!m) throw new Error('namesByCoord introuvable');
     return JSON.parse(m[1]);
+  };
 
-  } catch(err) {
-    throw err;
-  }
+  return Promise.race([work(), timeout]);
 }
 
   
