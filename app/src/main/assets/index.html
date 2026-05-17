@@ -113,22 +113,51 @@ function assign(bikes){
 }
 
 async function fetchData(){
-  // Etape 1 : login
-  const form = new URLSearchParams(CREDS);
-  const loginResp = await fetch(BACKOFFICE+'/log-in', {
-    method:'POST', body:form, credentials:'include',
-    headers:{'Content-Type':'application/x-www-form-urlencoded'},
-    redirect:'follow'
+  // Etape 1 : récupérer la page de login pour avoir le token CSRF
+  const loginPage = await fetch('https://backoffice-fredo-prod.apnl.info/log-in', {
+    credentials: 'include',
+    headers: { 'User-Agent': 'Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 Chrome/91.0 Mobile Safari/537.36' }
+  });
+  const loginHtml = await loginPage.text();
+
+  // Extraire le token CSRF
+  const tokenMatch = loginHtml.match(/name="_csrf_token"\s+value="([^"]+)"/);
+  const csrfToken = tokenMatch ? tokenMatch[1] : '';
+
+  // Etape 2 : login avec le token CSRF
+  const form = new URLSearchParams();
+  form.append('_username', 'client+grandcalais@fredo.fr');
+  form.append('_password', 'Ic3nL6ciuAG7');
+  form.append('_csrf_token', csrfToken);
+
+  await fetch('https://backoffice-fredo-prod.apnl.info/log-in', {
+    method: 'POST',
+    body: form,
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    redirect: 'follow'
   });
 
-  // Etape 2 : récupérer la page zones avec cookie
-  const resp = await fetch(BACKOFFICE+'/clientZones/', {
-    credentials:'include',
-    headers:{
-      'X-Requested-With':'XMLHttpRequest',
-      'Accept':'text/html,application/xhtml+xml'
-    }
+  // Etape 3 : récupérer la page des zones
+  const resp = await fetch('https://backoffice-fredo-prod.apnl.info/clientZones/', {
+    credentials: 'include',
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
   });
+
+  if(!resp.ok) throw new Error('Erreur HTTP ' + resp.status);
+  const html = await resp.text();
+
+  // Chercher namesByCoord
+  let m = html.match(/namesByCoord\s*=\s*(\{[\s\S]*?\});/);
+  if(!m){
+    try {
+      const json = JSON.parse(html);
+      m = (json.html||'').match(/namesByCoord\s*=\s*(\{[\s\S]*?\});/);
+    } catch(e){}
+  }
+  if(!m) throw new Error('Données introuvables — ' + resp.status + ' ' + html.substring(0,100));
+  return JSON.parse(m[1]);
+}
 
   if(!resp.ok) throw new Error('Erreur HTTP ' + resp.status);
   const html = await resp.text();
