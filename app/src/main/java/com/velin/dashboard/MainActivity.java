@@ -3,6 +3,7 @@ package com.velin.dashboard;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
 import android.webkit.*;
 import android.graphics.Color;
 
@@ -10,6 +11,7 @@ public class MainActivity extends Activity {
 
     private WebView webView;
     private static final String BACKOFFICE = "https://backoffice-fredo-prod.apnl.info";
+    private final Handler handler = new Handler();
 
     @SuppressLint({"SetJavaScriptEnabled"})
     @Override
@@ -41,82 +43,73 @@ public class MainActivity extends Activity {
 
             @Override
             public void onPageFinished(WebView view, String url) {
+                // Cacher la page pendant le traitement
+                view.evaluateJavascript(
+                    "document.body.style.visibility='hidden';document.body.style.background='#0d0f14';",
+                    null
+                );
+
                 if (url.contains("/log-in") || url.equals(BACKOFFICE + "/") || url.equals(BACKOFFICE)) {
-                    // Auto-login : remplir et soumettre le formulaire
+                    // Auto-login
                     view.evaluateJavascript(
                         "(function(){" +
-                        "  var u = document.querySelector('input[name=_username], input[type=email], input[name=email]');" +
-                        "  var p = document.querySelector('input[name=_password], input[type=password]');" +
-                        "  var f = document.querySelector('form');" +
-                        "  if(u && p && f){" +
-                        "    u.value='client+grandcalais@fredo.fr';" +
-                        "    p.value='Ic3nL6ciuAG7';" +
-                        "    f.submit();" +
-                        "  } else {" +
-                        "    document.body.style.background='#0d0f14';" +
-                        "    document.body.innerHTML='<p style=\"color:red;padding:20px\">Formulaire non trouvé: '+document.body.innerHTML.substring(0,200)+'</p>';" +
-                        "  }" +
+                        "  var u=document.querySelector('input[name=_username],input[type=email]');" +
+                        "  var p=document.querySelector('input[name=_password],input[type=password]');" +
+                        "  var f=document.querySelector('form');" +
+                        "  if(u&&p&&f){u.value='client+grandcalais@fredo.fr';p.value='Ic3nL6ciuAG7';f.submit();}" +
                         "})();",
                         null
                     );
                 } else if (url.contains("/clientZones")) {
-                    // On est sur la bonne page, injecter le dashboard
-                    injectDashboard(view);
+                    // Attendre 2s que le JS de la page charge namesByCoord
+                    handler.postDelayed(() -> tryInject(view, 0), 2000);
                 } else if (url.contains("/client")) {
-                    // Connecté mais pas sur zones, naviguer vers zones
                     view.loadUrl(BACKOFFICE + "/clientZones/");
                 }
             }
         });
 
-        // Démarrer sur la page de login
         webView.loadUrl(BACKOFFICE + "/log-in");
     }
 
-    private void injectDashboard(WebView view) {
-        // Lire namesByCoord et injecter le dashboard
+    private void tryInject(WebView view, int attempt) {
+        if (attempt > 10) {
+            view.evaluateJavascript(
+                "document.body.style.visibility='visible';" +
+                "document.body.innerHTML='<div style=\"color:red;padding:40px;font-family:sans-serif\">Erreur: namesByCoord introuvable après " + attempt + " tentatives</div>';",
+                null
+            );
+            return;
+        }
+
         view.evaluateJavascript(
-            "(function(){" +
-            "  if(typeof namesByCoord !== 'undefined'){" +
-            "    return JSON.stringify(namesByCoord);" +
-            "  }" +
-            "  return 'null';" +
-            "})();",
+            "(function(){ return typeof namesByCoord !== 'undefined' ? JSON.stringify(namesByCoord) : 'null'; })()",
             value -> {
                 if (value != null && !value.equals("null") && !value.equals("\"null\"")) {
-                    // Charger le dashboard avec les données
-                    String bikes = value.replace("'", "\\'");
-                    view.loadUrl(BACKOFFICE + "/clientZones/");
-                    view.evaluateJavascript(
-                        "window.__BIKES__ = " + value.substring(1, value.length()-1).replace("\\\"", "\"") + ";",
-                        null
-                    );
-                    loadDashboardFile(view, value);
+                    // Données trouvées, injecter le dashboard
+                    String cleanJson = value.substring(1, value.length() - 1).replace("\\\"", "\"");
+                    injectDashboard(view, cleanJson);
                 } else {
-                    view.evaluateJavascript(
-                        "document.body.innerHTML='<p style=\"color:orange;padding:20px;font-family:sans-serif\">namesByCoord non trouvé sur ' + window.location.href + '</p>';",
-                        null
-                    );
+                    // Réessayer dans 1 seconde
+                    handler.postDelayed(() -> tryInject(view, attempt + 1), 1000);
                 }
             }
         );
     }
 
-    private void loadDashboardFile(WebView view, String bikesJson) {
+    private void injectDashboard(WebView view, String bikesJson) {
         try {
             java.io.InputStream is = getAssets().open("dashboard.js");
             byte[] buffer = new byte[is.available()];
             is.read(buffer);
             is.close();
             String js = new String(buffer, "UTF-8");
-            // Passer les données au dashboard
-            String init = "var __BIKES_DATA__ = " + 
-                bikesJson.substring(1, bikesJson.length()-1).replace("\\\"", "\"") + 
-                "; " + js;
+            String init = "var __BIKES_DATA__ = " + bikesJson + "; " + js;
             view.evaluateJavascript(init, null);
         } catch (Exception e) {
             view.evaluateJavascript(
-                "document.body.innerHTML='<p style=\"color:red;padding:20px\">Erreur: " + e.getMessage() + "</p>';",
+                "document.body.style.visibility='visible';" +
+                "document.body.innerHTML='<div style=\"color:red;padding:40px\">Erreur dashboard: " + e.getMessage() + "</div>';",
                 null
             );
         }
