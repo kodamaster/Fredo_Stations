@@ -7,7 +7,7 @@
     "2891":{ nom:"Université",     places:9, lat:50.952378, lng:1.879473 },
     "2893":{ nom:"Milieu de Digue",places:6, lat:50.962880, lng:1.835723 }
   };
-  const RADIUS = 200;
+  const RADIUS = 50;
   const bikes = __BIKES_DATA__;
 
   function haversine(lat1,lng1,lat2,lng2){
