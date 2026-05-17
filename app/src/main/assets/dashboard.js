@@ -80,7 +80,7 @@
   window.reload=()=>window.location.reload();
 
   let html=`<style>${css}</style>
-  <div class="header"><div class="dot"></div><div class="title">Vel'<span>in</span> — Flotte</div>
+  <div class="header"><div class="dot"></div><div class="title">Fredo - Liste</div>
   <div class="rbtn" onclick="reload()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5b9bd5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg></div></div>
   <div class="stats">
     <div class="stat"><div class="sv">${total}</div><div class="sl">Total</div></div>
