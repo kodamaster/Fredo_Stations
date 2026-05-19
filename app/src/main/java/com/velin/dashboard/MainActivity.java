@@ -85,30 +85,35 @@ public class MainActivity extends Activity {
         view.evaluateJavascript(
             "(function(){" +
             "  if(typeof namesByCoord === 'undefined' || typeof polygonsById === 'undefined') return 'null';" +
-            // Debug : voir ce qu'on trouve dans le DOM
-            "  var debug = {" +
-            "    zonesListItems: document.querySelector('#zones-list-items') ? 'TROUVE' : 'NON TROUVE'," +
-            "    allLi: document.querySelectorAll('li[data-zone-id]').length," +
-            "    allDataZone: document.querySelectorAll('[data-zone-id]').length," +
-            "    bodySnippet: document.body.innerHTML.substring(0,300)," +
-            "    polygonIds: Object.keys(polygonsById)" +
-            "  };" +
-            "  return JSON.stringify(debug);" +
+            "  var zones = {};" +
+            "  Object.keys(polygonsById).forEach(function(id) {" +
+            "    var poly = polygonsById[id];" +
+            "    var path = poly.getPath().getArray().map(function(p){ return {lat:p.lat(),lng:p.lng()}; });" +
+            // Lire nom et places depuis les attributs data du li
+            "    var li = document.querySelector('[data-zone-id=\"'+id+'\"]');" +
+            "    var nom = 'Zone '+id;" +
+            "    var places = 0;" +
+            "    if(li){" +
+            "      nom = li.dataset.zoneName || li.getAttribute('data-zone-name') || li.dataset.name || '';" +
+            "      places = parseInt(li.dataset.zonePlaces || li.getAttribute('data-zone-places') || li.dataset.places || '0');" +
+            // Si toujours vide, lire le texte brut du li
+            "      if(!nom){" +
+            "        var txt = li.textContent.trim();" +
+            "        var lines = txt.split('\\n').map(function(l){return l.trim();}).filter(function(l){return l.length>0;});" +
+            "        if(lines.length>0) nom = lines[0];" +
+            "        if(lines.length>1){ var m=lines[1].match(/\\d+/); if(m) places=parseInt(m[0]); }" +
+            "      }" +
+            "    }" +
+            "    zones[id] = {nom:nom, places:places, path:path};" +
+            "  });" +
+            "  return JSON.stringify({bikes: namesByCoord, zones: zones});" +
             "})()",
             value -> {
-                // Afficher le debug dans l'app
-                if (value != null) {
-                    String clean = value.replace("\\\"", "\"");
-                    view.evaluateJavascript(
-                        "document.body.style.visibility='visible';" +
-                        "document.body.style.background='#0d0f14';" +
-                        "document.body.style.color='#f0f2f7';" +
-                        "document.body.style.fontFamily='monospace';" +
-                        "document.body.style.padding='20px';" +
-                        "document.body.style.fontSize='11px';" +
-                        "document.body.innerHTML='<pre style=\"word-break:break-all;white-space:pre-wrap\">" + clean.replace("'", "\\'") + "</pre>';",
-                        null
-                    );
+                if (value != null && !value.equals("null") && !value.equals("\"null\"")) {
+                    String cleanJson = value.substring(1, value.length() - 1).replace("\\\"", "\"");
+                    injectDashboard(view, cleanJson);
+                } else {
+                    handler.postDelayed(() -> tryInject(view, attempt + 1), 1000);
                 }
             }
         );
