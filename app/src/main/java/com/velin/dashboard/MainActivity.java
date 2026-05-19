@@ -85,33 +85,30 @@ public class MainActivity extends Activity {
         view.evaluateJavascript(
             "(function(){" +
             "  if(typeof namesByCoord === 'undefined' || typeof polygonsById === 'undefined') return 'null';" +
-            "  var zones = {};" +
-            "  Object.keys(polygonsById).forEach(function(id) {" +
-            "    var poly = polygonsById[id];" +
-            "    var path = poly.getPath().getArray().map(function(p){ return {lat:p.lat(),lng:p.lng()}; });" +
-            // Chercher le li avec data-zone-id
-            "    var li = document.querySelector('#zones-list-items [data-zone-id=\"'+id+'\"]');" +
-            "    var nom = 'Zone '+id;" +
-            "    var places = 0;" +
-            "    if(li){" +
-            "      var strong = li.querySelector('strong');" +
-            "      var small = li.querySelector('small');" +
-            "      if(strong) nom = strong.innerText.trim();" +
-            "      if(small){" +
-            "        var match = small.innerText.match(/\\d+/);" +
-            "        if(match) places = parseInt(match[0]);" +
-            "      }" +
-            "    }" +
-            "    zones[id] = {nom:nom, places:places, path:path};" +
-            "  });" +
-            "  return JSON.stringify({bikes: namesByCoord, zones: zones});" +
+            // Debug : voir ce qu'on trouve dans le DOM
+            "  var debug = {" +
+            "    zonesListItems: document.querySelector('#zones-list-items') ? 'TROUVE' : 'NON TROUVE'," +
+            "    allLi: document.querySelectorAll('li[data-zone-id]').length," +
+            "    allDataZone: document.querySelectorAll('[data-zone-id]').length," +
+            "    bodySnippet: document.body.innerHTML.substring(0,300)," +
+            "    polygonIds: Object.keys(polygonsById)" +
+            "  };" +
+            "  return JSON.stringify(debug);" +
             "})()",
             value -> {
-                if (value != null && !value.equals("null") && !value.equals("\"null\"")) {
-                    String cleanJson = value.substring(1, value.length() - 1).replace("\\\"", "\"");
-                    injectDashboard(view, cleanJson);
-                } else {
-                    handler.postDelayed(() -> tryInject(view, attempt + 1), 1000);
+                // Afficher le debug dans l'app
+                if (value != null) {
+                    String clean = value.replace("\\\"", "\"");
+                    view.evaluateJavascript(
+                        "document.body.style.visibility='visible';" +
+                        "document.body.style.background='#0d0f14';" +
+                        "document.body.style.color='#f0f2f7';" +
+                        "document.body.style.fontFamily='monospace';" +
+                        "document.body.style.padding='20px';" +
+                        "document.body.style.fontSize='11px';" +
+                        "document.body.innerHTML='<pre style=\"word-break:break-all;white-space:pre-wrap\">" + clean.replace("'", "\\'") + "</pre>';",
+                        null
+                    );
                 }
             }
         );
