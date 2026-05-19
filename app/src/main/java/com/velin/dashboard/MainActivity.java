@@ -49,7 +49,7 @@ public class MainActivity extends Activity {
                     null
                 );
                 // Ensuite attendre 4s avant d'injecter
-                handler.postDelayed(() -> tryInject(view, 0), 4000);
+                handler.postDelayed(() -> tryInject(view, 0), 7000);
 
                 if (url.contains("/log-in") || url.equals(BACKOFFICE + "/") || url.equals(BACKOFFICE)) {
                     // Auto-login
