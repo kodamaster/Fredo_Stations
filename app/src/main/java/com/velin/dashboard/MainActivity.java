@@ -73,29 +73,39 @@ public class MainActivity extends Activity {
     }
 
     private void tryInject(WebView view, int attempt) {
-        if (attempt > 10) {
-            view.evaluateJavascript(
-                "document.body.style.visibility='visible';" +
-                "document.body.innerHTML='<div style=\"color:red;padding:40px;font-family:sans-serif\">Erreur: namesByCoord introuvable après " + attempt + " tentatives</div>';",
-                null
-            );
-            return;
-        }
-
+    if (attempt > 10) {
         view.evaluateJavascript(
-            "(function(){ return typeof namesByCoord !== 'undefined' ? JSON.stringify(namesByCoord) : 'null'; })()",
-            value -> {
-                if (value != null && !value.equals("null") && !value.equals("\"null\"")) {
-                    // Données trouvées, injecter le dashboard
-                    String cleanJson = value.substring(1, value.length() - 1).replace("\\\"", "\"");
-                    injectDashboard(view, cleanJson);
-                } else {
-                    // Réessayer dans 1 seconde
-                    handler.postDelayed(() -> tryInject(view, attempt + 1), 1000);
-                }
-            }
+            "document.body.style.visibility='visible';" +
+            "document.body.innerHTML='<div style=\"color:red;padding:40px;font-family:sans-serif\">Erreur: données introuvables</div>';",
+            null
         );
+        return;
     }
+
+    view.evaluateJavascript(
+        "(function(){" +
+        "  if(typeof namesByCoord === 'undefined' || typeof polygonsById === 'undefined') return 'null';" +
+        "  var zones = {};" +
+        "  Object.keys(polygonsById).forEach(function(id) {" +
+        "    var poly = polygonsById[id];" +
+        "    var path = poly.getPath().getArray().map(function(p){ return {lat:p.lat(),lng:p.lng()}; });" +
+        "    var li = document.querySelector('[data-zone-id=\"'+id+'\"]');" +
+        "    var nom = li ? li.querySelector('strong').innerText : 'Zone '+id;" +
+        "    var places = li ? parseInt(li.querySelector('small').innerText) : 0;" +
+        "    zones[id] = {nom:nom, places:places, path:path};" +
+        "  });" +
+        "  return JSON.stringify({bikes: namesByCoord, zones: zones});" +
+        "})()",
+        value -> {
+            if (value != null && !value.equals("null") && !value.equals("\"null\"")) {
+                String cleanJson = value.substring(1, value.length() - 1).replace("\\\"", "\"");
+                injectDashboard(view, cleanJson);
+            } else {
+                handler.postDelayed(() -> tryInject(view, attempt + 1), 1000);
+            }
+        }
+    );
+}
 
     private void injectDashboard(WebView view, String bikesJson) {
         try {
