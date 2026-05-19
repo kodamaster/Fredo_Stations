@@ -48,6 +48,8 @@ public class MainActivity extends Activity {
                     "document.body.style.visibility='hidden';document.body.style.background='#0d0f14';",
                     null
                 );
+                // Ensuite attendre 4s avant d'injecter
+                handler.postDelayed(() -> tryInject(view, 0), 4000);
 
                 if (url.contains("/log-in") || url.equals(BACKOFFICE + "/") || url.equals(BACKOFFICE)) {
                     // Auto-login
