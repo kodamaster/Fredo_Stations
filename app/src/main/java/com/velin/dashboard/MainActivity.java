@@ -73,35 +73,65 @@ public class MainActivity extends Activity {
     }
 
     private void captureZoneNames(WebView view, int attempt) {
-        if (attempt > 12) {
+    view.evaluateJavascript(
+        "(function(){" +
+        "  return new Promise(function(resolve){" +
+        "    function getNames(){" +
+        "      var names = {};" +
+        "      document.querySelectorAll('[data-zone-id]').forEach(function(li){" +
+        "        var id = li.getAttribute('data-zone-id');" +
+        "        var strong = li.querySelector('strong');" +
+        "        var small = li.querySelector('small');" +
+        "        if(strong && strong.innerText.trim()){" +
+        "          var m = small ? small.innerText.match(/\\d+/) : null;" +
+        "          names[id] = {nom: strong.innerText.trim(), places: m ? parseInt(m[0]) : 0};" +
+        "        }" +
+        "      });" +
+        "      return names;" +
+        "    }" +
+        // Observer les changements du DOM
+        "    var observer = new MutationObserver(function(){" +
+        "      var n = getNames();" +
+        "      if(Object.keys(n).length > 0){" +
+        "        observer.disconnect();" +
+        "        window.__ZONE_NAMES__ = n;" +
+        "      }" +
+        "    });" +
+        "    observer.observe(document.body, {childList:true, subtree:true, characterData:true});" +
+        // Vérifier aussi immédiatement
+        "    var n = getNames();" +
+        "    if(Object.keys(n).length > 0) window.__ZONE_NAMES__ = n;" +
+        "  });" +
+        "})()",
+        null
+    );
+
+    // Attendre 3s puis lire __ZONE_NAMES__
+    handler.postDelayed(() -> readCapturedNames(view, 0), 3000);
+}
+
+    private void readCapturedNames(WebView view, int attempt) {
+        if (attempt > 10) {
             tryInjectWithNames(view, null, 0);
             return;
         }
         view.evaluateJavascript(
             "(function(){" +
-            "  var names = {};" +
-            "  document.querySelectorAll('[data-zone-id]').forEach(function(li){" +
-            "    var id = li.getAttribute('data-zone-id');" +
-            "    var strong = li.querySelector('strong');" +
-            "    var small = li.querySelector('small');" +
-            "    if(strong && strong.innerText.trim() && strong.innerText.trim().length > 0){" +
-            "      var m = small ? small.innerText.match(/\\d+/) : null;" +
-            "      names[id] = {nom: strong.innerText.trim(), places: m ? parseInt(m[0]) : 0};" +
-            "    }" +
-            "  });" +
-            "  return Object.keys(names).length > 0 ? JSON.stringify(names) : 'null';" +
+            "  if(typeof window.__ZONE_NAMES__ !== 'undefined' && Object.keys(window.__ZONE_NAMES__).length > 0){" +
+            "    return JSON.stringify(window.__ZONE_NAMES__);" +
+            "  }" +
+            "  return 'null';" +
             "})()",
             value -> {
                 if (value != null && !value.equals("null") && !value.equals("\"null\"")) {
                     String cleanNames = value.substring(1, value.length() - 1).replace("\\\"", "\"");
                     tryInjectWithNames(view, cleanNames, 0);
                 } else {
-                    handler.postDelayed(() -> captureZoneNames(view, attempt + 1), 500);
+                    handler.postDelayed(() -> readCapturedNames(view, attempt + 1), 500);
                 }
             }
         );
     }
-
     private void tryInjectWithNames(WebView view, String namesJson, int attempt) {
         if (attempt > 10) {
             view.evaluateJavascript(
