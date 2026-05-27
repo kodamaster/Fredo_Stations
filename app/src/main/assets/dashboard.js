@@ -62,7 +62,7 @@
   const now = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
   const rows = Object.entries(ZONES)
     .map(([id,z]) => ({id, nom:z.nom, places:z.places, bikes:counts[id]}))
-    .sort((a,b) => b.bikes.length - a.bikes.length);
+    .sort((a,b) => a.nom.localeCompare(b.nom));
 
   const css = `
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
