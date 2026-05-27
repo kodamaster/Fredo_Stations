@@ -43,14 +43,12 @@ public class MainActivity extends Activity {
 
             @Override
             public void onPageFinished(WebView view, String url) {
-                // Cacher la page pendant le traitement
                 view.evaluateJavascript(
                     "document.body.style.visibility='hidden';document.body.style.background='#0d0f14';",
                     null
                 );
 
                 if (url.contains("/log-in") || url.equals(BACKOFFICE + "/") || url.equals(BACKOFFICE)) {
-                    // Auto-login
                     view.evaluateJavascript(
                         "(function(){" +
                         "  var u=document.querySelector('input[name=_username],input[type=email]');" +
@@ -61,8 +59,7 @@ public class MainActivity extends Activity {
                         null
                     );
                 } else if (url.contains("/clientZones")) {
-                    // Capturer les noms dès qu'ils apparaissent
-                    captureZoneNames(view, 0);
+                    handler.postDelayed(() -> tryInject(view, 0), 3000);
                 } else if (url.contains("/client")) {
                     view.loadUrl(BACKOFFICE + "/clientZones/");
                 }
@@ -72,67 +69,7 @@ public class MainActivity extends Activity {
         webView.loadUrl(BACKOFFICE + "/log-in");
     }
 
-    private void captureZoneNames(WebView view, int attempt) {
-    view.evaluateJavascript(
-        "(function(){" +
-        "  return new Promise(function(resolve){" +
-        "    function getNames(){" +
-        "      var names = {};" +
-        "      document.querySelectorAll('[data-zone-id]').forEach(function(li){" +
-        "        var id = li.getAttribute('data-zone-id');" +
-        "        var strong = li.querySelector('strong');" +
-        "        var small = li.querySelector('small');" +
-        "        if(strong && strong.innerText.trim()){" +
-        "          var m = small ? small.innerText.match(/\\d+/) : null;" +
-        "          names[id] = {nom: strong.innerText.trim(), places: m ? parseInt(m[0]) : 0};" +
-        "        }" +
-        "      });" +
-        "      return names;" +
-        "    }" +
-        // Observer les changements du DOM
-        "    var observer = new MutationObserver(function(){" +
-        "      var n = getNames();" +
-        "      if(Object.keys(n).length > 0){" +
-        "        observer.disconnect();" +
-        "        window.__ZONE_NAMES__ = n;" +
-        "      }" +
-        "    });" +
-        "    observer.observe(document.body, {childList:true, subtree:true, characterData:true});" +
-        // Vérifier aussi immédiatement
-        "    var n = getNames();" +
-        "    if(Object.keys(n).length > 0) window.__ZONE_NAMES__ = n;" +
-        "  });" +
-        "})()",
-        null
-    );
-
-    // Attendre 3s puis lire __ZONE_NAMES__
-    handler.postDelayed(() -> readCapturedNames(view, 0), 3000);
-}
-
-    private void readCapturedNames(WebView view, int attempt) {
-        if (attempt > 10) {
-            tryInjectWithNames(view, null, 0);
-            return;
-        }
-        view.evaluateJavascript(
-            "(function(){" +
-            "  if(typeof window.__ZONE_NAMES__ !== 'undefined' && Object.keys(window.__ZONE_NAMES__).length > 0){" +
-            "    return JSON.stringify(window.__ZONE_NAMES__);" +
-            "  }" +
-            "  return 'null';" +
-            "})()",
-            value -> {
-                if (value != null && !value.equals("null") && !value.equals("\"null\"")) {
-                    String cleanNames = value.substring(1, value.length() - 1).replace("\\\"", "\"");
-                    tryInjectWithNames(view, cleanNames, 0);
-                } else {
-                    handler.postDelayed(() -> readCapturedNames(view, attempt + 1), 500);
-                }
-            }
-        );
-    }
-    private void tryInjectWithNames(WebView view, String namesJson, int attempt) {
+    private void tryInject(WebView view, int attempt) {
         if (attempt > 10) {
             view.evaluateJavascript(
                 "document.body.style.visibility='visible';" +
@@ -142,19 +79,14 @@ public class MainActivity extends Activity {
             return;
         }
 
-        final String finalNames = namesJson != null ? namesJson : "{}";
         view.evaluateJavascript(
             "(function(){" +
             "  if(typeof namesByCoord === 'undefined' || typeof polygonsById === 'undefined') return 'null';" +
             "  var zones = {};" +
-            "  var savedNames = " + finalNames + ";" +
             "  Object.keys(polygonsById).forEach(function(id) {" +
             "    var poly = polygonsById[id];" +
             "    var path = poly.getPath().getArray().map(function(p){ return {lat:p.lat(),lng:p.lng()}; });" +
-            "    var saved = savedNames[id];" +
-            "    var nom = saved ? saved.nom : 'Zone '+id;" +
-            "    var places = saved ? saved.places : 0;" +
-            "    zones[id] = {nom:nom, places:places, path:path};" +
+            "    zones[id] = {path:path};" +
             "  });" +
             "  return JSON.stringify({bikes: namesByCoord, zones: zones});" +
             "})()",
@@ -163,7 +95,7 @@ public class MainActivity extends Activity {
                     String cleanJson = value.substring(1, value.length() - 1).replace("\\\"", "\"");
                     injectDashboard(view, cleanJson);
                 } else {
-                    handler.postDelayed(() -> tryInjectWithNames(view, namesJson, attempt + 1), 1000);
+                    handler.postDelayed(() -> tryInject(view, attempt + 1), 1000);
                 }
             }
         );
@@ -181,7 +113,7 @@ public class MainActivity extends Activity {
         } catch (Exception e) {
             view.evaluateJavascript(
                 "document.body.style.visibility='visible';" +
-                "document.body.innerHTML='<div style=\"color:red;padding:40px\">Erreur dashboard: " + e.getMessage() + "</div>';",
+                "document.body.innerHTML='<div style=\"color:red;padding:40px\">Erreur: " + e.getMessage() + "</div>';",
                 null
             );
         }
