@@ -4,17 +4,20 @@
   const zonesRaw = data.zones;
   const RADIUS = 50;
 
+  // Vélos en cours de location à exclure
+  const activeRentals = typeof __ACTIVE_RENTALS__ !== 'undefined' ? __ACTIVE_RENTALS__ : [];
+
   // =============================================
   // STATIONS EN DUR — modifier ici si besoin
-  // Format : "ID": {nom: "Nom", places: X}
+  // Format : "ID": {nom: "Nom", places: X, ordre: Y}
   // =============================================
   const ZONE_NAMES = {
-    "2905": {nom: "Gare",            places: 9},
-    "2888": {nom: "Nation",          places: 6},
-    "2889": {nom: "Théâtre",         places: 9},
-    "2890": {nom: "Place d'Armes",   places: 6},
-    "2891": {nom: "Université",      places: 9},
-    "2893": {nom: "Milieu de Digue", places: 6}
+    "2888": {nom: "Nation",          places: 6,  ordre: 3},
+    "2889": {nom: "Théâtre",         places: 9,  ordre: 5},
+    "2890": {nom: "Place d'Armes",   places: 6,  ordre: 4},
+    "2891": {nom: "Université",      places: 9,  ordre: 6},
+    "2893": {nom: "Milieu de Digue", places: 6,  ordre: 2},
+    "2905": {nom: "Gare",            places: 9,  ordre: 1}
   };
   // =============================================
 
@@ -33,36 +36,42 @@
   // Construire les zones avec centroïdes
   const ZONES = {};
   Object.entries(zonesRaw).forEach(([id, z]) => {
-    const info = ZONE_NAMES[id] || {nom: 'Zone '+id, places: 0};
+    const info = ZONE_NAMES[id] || {nom: 'Zone '+id, places: 0, ordre: 99};
     ZONES[id] = {
       nom: info.nom,
       places: info.places,
+      ordre: info.ordre || 99,
       centroid: centroid(z.path)
     };
   });
 
-  // Assigner les vélos aux zones
+  // Assigner les vélos aux zones en excluant ceux en location
   const counts = {};
   Object.keys(ZONES).forEach(id => counts[id] = []);
   const outside = [];
 
   Object.entries(bikes).forEach(([coord, ids]) => {
+    // Filtrer les vélos en cours de location
+    const filteredIds = ids.filter(id => !activeRentals.includes(id));
+    if (filteredIds.length === 0) return;
+
     const [lat, lng] = coord.split(',').map(Number);
     let bestId = null, bestDist = Infinity;
     for (const [id, z] of Object.entries(ZONES)) {
       const d = haversine(lat, lng, z.centroid.lat, z.centroid.lng);
       if (d < RADIUS && d < bestDist) { bestDist = d; bestId = id; }
     }
-    if (bestId) counts[bestId].push(...ids);
-    else outside.push(...ids);
+    if (bestId) counts[bestId].push(...filteredIds);
+    else outside.push(...filteredIds);
   });
 
   const total = Object.values(counts).reduce((s,v) => s+v.length, 0) + outside.length;
   const enStation = Object.values(counts).reduce((s,v) => s+v.length, 0);
+  const enLocation = activeRentals.length;
   const now = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
   const rows = Object.entries(ZONES)
-    .map(([id,z]) => ({id, nom:z.nom, places:z.places, bikes:counts[id]}))
-    .sort((a,b) => a.nom.localeCompare(b.nom));
+    .map(([id,z]) => ({id, nom:z.nom, places:z.places, ordre:z.ordre, bikes:counts[id]}))
+    .sort((a,b) => a.ordre - b.ordre);
 
   const css = `
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -94,6 +103,7 @@
     .low{background:rgba(245,158,11,.12);color:#f59e0b}
     .empty{background:rgba(239,68,68,.12);color:#ef4444}
     .blue{background:rgba(91,155,213,.15);color:#5b9bd5}
+    .purple{background:rgba(168,85,247,.12);color:#a855f7}
     .chev{color:#6b7280;transition:transform .25s;flex-shrink:0}
     .sbody{display:none;padding:0 14px 14px;border-top:1px solid rgba(255,255,255,.07)}
     .sbody.open{display:block}
@@ -119,7 +129,7 @@
   let html = `<style>${css}</style>
   <div class="header">
     <div class="dot"></div>
-    <div class="title">Fredo — Stations</div>
+    <div class="title">Vel'<span>in</span> — Flotte</div>
     <div class="rbtn" onclick="reload()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5b9bd5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
@@ -130,7 +140,7 @@
   <div class="stats">
     <div class="stat"><div class="sv">${total}</div><div class="sl">Total</div></div>
     <div class="stat"><div class="sv">${enStation}</div><div class="sl">En station</div></div>
-    <div class="stat"><div class="sv">${outside.length}</div><div class="sl">Hors zone</div></div>
+    <div class="stat"><div class="sv">${enLocation}</div><div class="sl">En location</div></div>
   </div>
   <div class="upd">Mis à jour à ${now} · ${Object.keys(ZONES).length} stations</div>
   <div class="stations">`;
@@ -202,6 +212,34 @@
       <div class="sbody" id="body-out">
         <div class="blbl">Numéros des vélos</div>
         <div class="bgrid">${outside.map(b => `<span class="pill">#${b}</span>`).join('')}</div>
+      </div>
+    </div>`;
+  }
+
+  if (activeRentals.length > 0) {
+    html += `
+    <div class="station" style="border-style:dashed">
+      <div class="sh" onclick="toggle('rental')">
+        <div class="sl2">
+          <div class="ico">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <div><div class="sn" style="color:#a855f7">En location</div><div class="sm">trajets en cours</div></div>
+        </div>
+        <div class="sr">
+          <div><div class="cn" style="color:#a855f7">${activeRentals.length}</div><div class="cb">vélos</div></div>
+          <span class="badge purple">en cours</span>
+          <svg id="chev-rental" class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </div>
+      </div>
+      <div class="sbody" id="body-rental">
+        <div class="blbl">Numéros des vélos</div>
+        <div class="bgrid">${activeRentals.map(b => `<span class="pill">#${b}</span>`).join('')}</div>
       </div>
     </div>`;
   }
