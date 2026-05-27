@@ -9,7 +9,7 @@
   // Format : "ID": {nom: "Nom", places: X}
   // =============================================
   const ZONE_NAMES = {
-    "2887": {nom: "Gare",            places: 9},
+    "2905": {nom: "Gare",            places: 9},
     "2888": {nom: "Nation",          places: 6},
     "2889": {nom: "Théâtre",         places: 9},
     "2890": {nom: "Place d'Armes",   places: 6},
