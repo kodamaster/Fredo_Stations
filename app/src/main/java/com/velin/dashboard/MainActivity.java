@@ -113,49 +113,68 @@ public class MainActivity extends Activity {
         }
     
         private void extractRentals(WebView view) {
-        tryExtractRentals(view, 0);
+        view.evaluateJavascript(
+            "(function(){" +
+            "  function extract(){" +
+            "    var active = [];" +
+            "    document.querySelectorAll('table tbody tr').forEach(function(row){" +
+            "      var cells = row.querySelectorAll('td');" +
+            "      if(cells.length >= 2){" +
+            "        cells[1].innerText.trim().split('\\n').forEach(function(line){" +
+            "          var t = line.trim();" +
+            "          if(t.length > 0) active.push(t);" +
+            "        });" +
+            "      }" +
+            "    });" +
+            "    return active;" +
+            "  }" +
+            // Vérifier si déjà chargé
+            "  var now = extract();" +
+            "  if(now.length > 0){" +
+            "    window.__RENTALS_READY__ = JSON.stringify(now);" +
+            "    return;" +
+            "  }" +
+            // Sinon observer jusqu'à ce que ce soit chargé
+            "  var observer = new MutationObserver(function(){" +
+            "    var result = extract();" +
+            "    if(result.length > 0){" +
+            "      observer.disconnect();" +
+            "      window.__RENTALS_READY__ = JSON.stringify(result);" +
+            "    }" +
+            "  });" +
+            "  observer.observe(document.body, {childList:true, subtree:true, characterData:true});" +
+            // Timeout 10s
+            "  setTimeout(function(){" +
+            "    observer.disconnect();" +
+            "    if(!window.__RENTALS_READY__) window.__RENTALS_READY__ = '[]';" +
+            "  }, 10000);" +
+            "})()",
+            null
+        );
+        // Polling toutes les 500ms pour lire __RENTALS_READY__
+        pollRentals(view, 0);
     }
     
-    private void tryExtractRentals(WebView view, int attempt) {
-        if (attempt > 15) {
+    private void pollRentals(WebView view, int attempt) {
+        if (attempt > 25) {
             fetchingRentals = false;
             injectDashboard(view, storedBikesJson, "[]");
             return;
         }
         handler.postDelayed(() -> {
             view.evaluateJavascript(
-                "(function(){" +
-                "  var rows = document.querySelectorAll('table tbody tr');" +
-                "  if(rows.length === 0) return 'null';" +
-                "  var firstRow = rows[0];" +
-                "  var cells = firstRow.querySelectorAll('td');" +
-                "  if(cells.length === 0) return 'null';" +
-                "  var firstCell = cells[0].innerText.trim();" +
-                "  if(firstCell.length === 0) return 'null';" +
-                // Données chargées, extraire les numéros
-                "  var active = [];" +
-                "  rows.forEach(function(row){" +
-                "    var c = row.querySelectorAll('td');" +
-                "    if(c.length >= 2){" +
-                "      c[1].innerText.trim().split('\\n').forEach(function(line){" +
-                "        var t = line.trim();" +
-                "        if(t.length > 0) active.push(t);" +
-                "      });" +
-                "    }" +
-                "  });" +
-                "  return JSON.stringify(active);" +
-                "})()",
-                rentals -> {
-                    if (rentals == null || rentals.equals("null") || rentals.equals("\"null\"")) {
-                        tryExtractRentals(view, attempt + 1);
-                    } else {
-                        String cleanRentals = rentals.substring(1, rentals.length() - 1).replace("\\\"", "\"");
+                "typeof window.__RENTALS_READY__ !== 'undefined' ? window.__RENTALS_READY__ : 'null'",
+                result -> {
+                    if (result != null && !result.equals("null") && !result.equals("\"null\"")) {
+                        String cleanRentals = result.substring(1, result.length() - 1).replace("\\\"", "\"");
                         fetchingRentals = false;
                         injectDashboard(view, storedBikesJson, cleanRentals);
+                    } else {
+                        pollRentals(view, attempt + 1);
                     }
                 }
             );
-        }, 1000);
+        }, 500);
     }
 
     private void injectDashboard(WebView view, String bikesJson, String rentalsJson) {
