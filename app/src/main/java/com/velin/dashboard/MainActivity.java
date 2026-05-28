@@ -116,34 +116,27 @@ public class MainActivity extends Activity {
         handler.postDelayed(() -> {
             view.evaluateJavascript(
                 "(function(){" +
-                "  var rows = document.querySelectorAll('table tbody tr');" +
-                "  if(rows.length === 0) return 'EMPTY';" +
-                "  var active = [];" +
-                "  rows.forEach(function(row){" +
-                "    var cells = row.querySelectorAll('td');" +
-                "    if(cells.length >= 2){" +
-                "      cells[1].innerText.trim().split('\\n').forEach(function(line){" +
-                "        var t = line.trim();" +
-                "        if(t.length > 0) active.push(t);" +
-                "      });" +
-                "    }" +
-                "  });" +
-                "  return JSON.stringify(active);" +
+                "  var table = document.querySelector('table');" +
+                "  if(!table) return 'PAS DE TABLE';" +
+                "  var rows = table.querySelectorAll('tbody tr');" +
+                "  return 'ROWS:' + rows.length + ' | HTML:' + table.innerHTML.substring(0,300);" +
                 "})()",
-                rentals -> {
-                    if (rentals != null && rentals.equals("\"EMPTY\"")) {
-                        // Tableau pas encore chargé, réessayer
-                        handler.postDelayed(() -> extractRentals(view), 1000);
-                        return;
-                    }
-                    String cleanRentals = (rentals != null && !rentals.equals("null") && !rentals.equals("\"null\""))
-                        ? rentals.substring(1, rentals.length() - 1).replace("\\\"", "\"")
-                        : "[]";
-                    fetchingRentals = false;
-                    injectDashboard(view, storedBikesJson, cleanRentals);
+                result -> {
+                    String clean = result != null ? result.replace("\\\"","\"").replace("\\n"," ") : "null";
+                    // Afficher le debug dans l'app
+                    view.evaluateJavascript(
+                        "document.body.style.visibility='visible';" +
+                        "document.body.style.background='#0d0f14';" +
+                        "document.body.style.color='#f0f2f7';" +
+                        "document.body.style.padding='20px';" +
+                        "document.body.style.fontFamily='monospace';" +
+                        "document.body.style.fontSize='11px';" +
+                        "document.body.innerHTML='<pre style=\"word-break:break-all;white-space:pre-wrap\">" + clean.replace("'","\\'") + "</pre>';",
+                        null
+                    );
                 }
             );
-        }, 2000);
+        }, 3000);
     }
 
     private void injectDashboard(WebView view, String bikesJson, String rentalsJson) {
