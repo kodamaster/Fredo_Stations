@@ -79,64 +79,83 @@ public class MainActivity extends Activity {
     }
 
     private void tryInject(WebView view, int attempt) {
-        if (attempt > 10) {
+            if (attempt > 10) {
+                view.evaluateJavascript(
+                    "document.body.style.visibility='visible';" +
+                    "document.body.innerHTML='<div style=\"color:red;padding:40px;font-family:sans-serif\">Erreur: données introuvables</div>';",
+                    null
+                );
+                return;
+            }
+    
             view.evaluateJavascript(
-                "document.body.style.visibility='visible';" +
-                "document.body.innerHTML='<div style=\"color:red;padding:40px;font-family:sans-serif\">Erreur: données introuvables</div>';",
-                null
+                "(function(){" +
+                "  if(typeof namesByCoord === 'undefined' || typeof polygonsById === 'undefined') return 'null';" +
+                "  var zones = {};" +
+                "  Object.keys(polygonsById).forEach(function(id) {" +
+                "    var poly = polygonsById[id];" +
+                "    var path = poly.getPath().getArray().map(function(p){ return {lat:p.lat(),lng:p.lng()}; });" +
+                "    zones[id] = {path:path};" +
+                "  });" +
+                "  return JSON.stringify({bikes: namesByCoord, zones: zones});" +
+                "})()",
+                value -> {
+                    if (value != null && !value.equals("null") && !value.equals("\"null\"")) {
+                        // Stocker en Java (survit à la navigation)
+                        storedBikesJson = value.substring(1, value.length() - 1).replace("\\\"", "\"");
+                        fetchingRentals = true;
+                        webView.loadUrl(BACKOFFICE + "/clientHistory/unfinished");
+                    } else {
+                        handler.postDelayed(() -> tryInject(view, attempt + 1), 1000);
+                    }
+                }
             );
+        }
+    
+        private void extractRentals(WebView view) {
+        tryExtractRentals(view, 0);
+    }
+    
+    private void tryExtractRentals(WebView view, int attempt) {
+        if (attempt > 15) {
+            fetchingRentals = false;
+            injectDashboard(view, storedBikesJson, "[]");
             return;
         }
-
-        view.evaluateJavascript(
-            "(function(){" +
-            "  if(typeof namesByCoord === 'undefined' || typeof polygonsById === 'undefined') return 'null';" +
-            "  var zones = {};" +
-            "  Object.keys(polygonsById).forEach(function(id) {" +
-            "    var poly = polygonsById[id];" +
-            "    var path = poly.getPath().getArray().map(function(p){ return {lat:p.lat(),lng:p.lng()}; });" +
-            "    zones[id] = {path:path};" +
-            "  });" +
-            "  return JSON.stringify({bikes: namesByCoord, zones: zones});" +
-            "})()",
-            value -> {
-                if (value != null && !value.equals("null") && !value.equals("\"null\"")) {
-                    // Stocker en Java (survit à la navigation)
-                    storedBikesJson = value.substring(1, value.length() - 1).replace("\\\"", "\"");
-                    fetchingRentals = true;
-                    webView.loadUrl(BACKOFFICE + "/clientHistory/unfinished");
-                } else {
-                    handler.postDelayed(() -> tryInject(view, attempt + 1), 1000);
-                }
-            }
-        );
-    }
-
-    private void extractRentals(WebView view) {
         handler.postDelayed(() -> {
             view.evaluateJavascript(
                 "(function(){" +
-                "  var table = document.querySelector('table');" +
-                "  if(!table) return 'PAS DE TABLE';" +
-                "  var rows = table.querySelectorAll('tbody tr');" +
-                "  return 'ROWS:' + rows.length + ' | HTML:' + table.innerHTML.substring(0,300);" +
+                "  var rows = document.querySelectorAll('table tbody tr');" +
+                "  if(rows.length === 0) return 'null';" +
+                "  var firstRow = rows[0];" +
+                "  var cells = firstRow.querySelectorAll('td');" +
+                "  if(cells.length === 0) return 'null';" +
+                "  var firstCell = cells[0].innerText.trim();" +
+                "  if(firstCell.length === 0) return 'null';" +
+                // Données chargées, extraire les numéros
+                "  var active = [];" +
+                "  rows.forEach(function(row){" +
+                "    var c = row.querySelectorAll('td');" +
+                "    if(c.length >= 2){" +
+                "      c[1].innerText.trim().split('\\n').forEach(function(line){" +
+                "        var t = line.trim();" +
+                "        if(t.length > 0) active.push(t);" +
+                "      });" +
+                "    }" +
+                "  });" +
+                "  return JSON.stringify(active);" +
                 "})()",
-                result -> {
-                    String clean = result != null ? result.replace("\\\"","\"").replace("\\n"," ") : "null";
-                    // Afficher le debug dans l'app
-                    view.evaluateJavascript(
-                        "document.body.style.visibility='visible';" +
-                        "document.body.style.background='#0d0f14';" +
-                        "document.body.style.color='#f0f2f7';" +
-                        "document.body.style.padding='20px';" +
-                        "document.body.style.fontFamily='monospace';" +
-                        "document.body.style.fontSize='11px';" +
-                        "document.body.innerHTML='<pre style=\"word-break:break-all;white-space:pre-wrap\">" + clean.replace("'","\\'") + "</pre>';",
-                        null
-                    );
+                rentals -> {
+                    if (rentals == null || rentals.equals("null") || rentals.equals("\"null\"")) {
+                        tryExtractRentals(view, attempt + 1);
+                    } else {
+                        String cleanRentals = rentals.substring(1, rentals.length() - 1).replace("\\\"", "\"");
+                        fetchingRentals = false;
+                        injectDashboard(view, storedBikesJson, cleanRentals);
+                    }
                 }
             );
-        }, 3000);
+        }, 1000);
     }
 
     private void injectDashboard(WebView view, String bikesJson, String rentalsJson) {
