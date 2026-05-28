@@ -136,7 +136,7 @@
     <div class="stat"><div class="sv">${enStation}</div><div class="sl">En station</div></div>
     <div class="stat"><div class="sv">${enLocation}</div><div class="sl">En location</div></div>
   </div>
-  <div class="upd">Mis à jour à ${now} · ${Object.keys(ZONES).length} stations</div>
+  <div class="upd">Mis à jour à ${now} · ${Object.keys(ZONES).length} stations · locations: ${JSON.stringify(activeRentals)}</div>
   <div class="stations">`;
 
   rows.forEach(r => {
