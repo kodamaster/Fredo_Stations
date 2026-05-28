@@ -12,6 +12,7 @@ public class MainActivity extends Activity {
     private WebView webView;
     private static final String BACKOFFICE = "https://backoffice-fredo-prod.apnl.info";
     private final Handler handler = new Handler();
+    private boolean fetchingRentals = false;
 
     @SuppressLint({"SetJavaScriptEnabled"})
     @Override
@@ -43,12 +44,14 @@ public class MainActivity extends Activity {
 
             @Override
             public void onPageFinished(WebView view, String url) {
+                // Cacher la page
                 view.evaluateJavascript(
                     "document.body.style.visibility='hidden';document.body.style.background='#0d0f14';",
                     null
                 );
 
                 if (url.contains("/log-in") || url.equals(BACKOFFICE + "/") || url.equals(BACKOFFICE)) {
+                    // Auto-login
                     view.evaluateJavascript(
                         "(function(){" +
                         "  var u=document.querySelector('input[name=_username],input[type=email]');" +
@@ -58,11 +61,19 @@ public class MainActivity extends Activity {
                         "})();",
                         null
                     );
-                } else if (url.contains("/clientZones")) {
-                    handler.postDelayed(() -> tryInject(view, 0), 3000);
                 } else if (url.contains("/clientHistory/unfinished")) {
-                    handler.postDelayed(() -> extractRentals(view), 3000);
-                } else if (url.contains("/client")) {
+                    // On est sur la page des trajets, extraire les données
+                    handler.postDelayed(() -> extractRentals(view), 2000);
+                } else if (url.contains("/clientZones")) {
+                    if (fetchingRentals) {
+                        // On revient sur zones après avoir récupéré les trajets
+                        fetchingRentals = false;
+                        handler.postDelayed(() -> injectFromStorage(view), 2000);
+                    } else {
+                        // Première visite sur zones, récupérer les données vélos
+                        handler.postDelayed(() -> tryInject(view, 0), 3000);
+                    }
+                } else if (url.contains("/client") && !fetchingRentals) {
                     view.loadUrl(BACKOFFICE + "/clientZones/");
                 }
             }
@@ -94,22 +105,19 @@ public class MainActivity extends Activity {
             "})()",
             value -> {
                 if (value != null && !value.equals("null") && !value.equals("\"null\"")) {
-                    // Stocker les données vélos puis aller chercher les trajets en cours
                     String cleanJson = value.substring(1, value.length() - 1).replace("\\\"", "\"");
-                    fetchActiveRentals(view, cleanJson);
+                    // Stocker les données et aller chercher les trajets
+                    view.evaluateJavascript(
+                        "window.__BIKES_JSON__ = " + cleanJson + ";",
+                        null
+                    );
+                    fetchingRentals = true;
+                    webView.loadUrl(BACKOFFICE + "/clientHistory/unfinished");
                 } else {
                     handler.postDelayed(() -> tryInject(view, attempt + 1), 1000);
                 }
             }
         );
-    }
-
-    private void fetchActiveRentals(WebView view, String bikesJson) {
-        // Stocker bikesJson pour l'utiliser après
-        final String storedJson = bikesJson;
-        // Naviguer vers la page des trajets en cours
-        view.evaluateJavascript("window.__BIKES_JSON__ = '" + bikesJson.replace("'", "\\'") + "';", null);
-        webView.loadUrl(BACKOFFICE + "/clientHistory/unfinished");
     }
 
     private void extractRentals(WebView view) {
@@ -131,39 +139,66 @@ public class MainActivity extends Activity {
                 String cleanRentals = (rentals != null && !rentals.equals("null") && !rentals.equals("\"null\""))
                     ? rentals.substring(1, rentals.length() - 1).replace("\\\"", "\"")
                     : "[]";
-
-                // Retourner sur la page zones
+                // Stocker les trajets et retourner sur zones
+                view.evaluateJavascript(
+                    "window.__RENTALS_JSON__ = " + cleanRentals + ";",
+                    null
+                );
                 webView.loadUrl(BACKOFFICE + "/clientZones/");
-
-                handler.postDelayed(() -> {
-                    view.evaluateJavascript(
-                        "document.body.style.visibility='hidden';document.body.style.background='#0d0f14';",
-                        null
-                    );
-                    // Récupérer le JSON des vélos stocké + injecter le dashboard
-                    final String finalRentals = cleanRentals;
-                    view.evaluateJavascript(
-                        "(function(){ return typeof window.__BIKES_JSON__ !== 'undefined' ? window.__BIKES_JSON__ : 'null'; })()",
-                        bikesJson -> {
-                            if (bikesJson != null && !bikesJson.equals("null") && !bikesJson.equals("\"null\"")) {
-                                String cleanBikes = bikesJson.substring(1, bikesJson.length() - 1).replace("\\\"", "\"");
-                                injectDashboard(view, cleanBikes, finalRentals);
-                            }
-                        }
-                    );
-                }, 2000);
             }
         );
     }
 
-    private void injectDashboard(WebView view, String bikesJson, String rentalsJson) {
+    private void injectFromStorage(WebView view) {
+        view.evaluateJavascript(
+            "(function(){" +
+            "  if(typeof window.__BIKES_JSON__ === 'undefined') return 'null';" +
+            "  return JSON.stringify({" +
+            "    bikes: window.__BIKES_JSON__," +
+            "    rentals: typeof window.__RENTALS_JSON__ !== 'undefined' ? window.__RENTALS_JSON__ : []" +
+            "  });" +
+            "})()",
+            value -> {
+                if (value != null && !value.equals("null") && !value.equals("\"null\"")) {
+                    try {
+                        // Extraire bikes et rentals
+                        view.evaluateJavascript(
+                            "(function(){" +
+                            "  return JSON.stringify({" +
+                            "    b: window.__BIKES_JSON__," +
+                            "    r: window.__RENTALS_JSON__ || []" +
+                            "  });" +
+                            "})()",
+                            data -> {
+                                if (data != null && !data.equals("null")) {
+                                    String clean = data.substring(1, data.length()-1).replace("\\\"","\"");
+                                    injectDashboard(view, clean);
+                                }
+                            }
+                        );
+                    } catch (Exception e) {
+                        view.evaluateJavascript(
+                            "document.body.style.visibility='visible';" +
+                            "document.body.innerHTML='<div style=\"color:red;padding:40px\">Erreur: " + e.getMessage() + "</div>';",
+                            null
+                        );
+                    }
+                } else {
+                    // Données perdues, recommencer
+                    tryInject(view, 0);
+                }
+            }
+        );
+    }
+
+    private void injectDashboard(WebView view, String dataJson) {
         try {
             java.io.InputStream is = getAssets().open("dashboard.js");
             byte[] buffer = new byte[is.available()];
             is.read(buffer);
             is.close();
             String js = new String(buffer, "UTF-8");
-            String init = "var __BIKES_DATA__ = " + bikesJson + "; var __ACTIVE_RENTALS__ = " + rentalsJson + "; " + js;
+            String init = "var __DATA__ = " + dataJson + "; " + js;
             view.evaluateJavascript(init, null);
         } catch (Exception e) {
             view.evaluateJavascript(
