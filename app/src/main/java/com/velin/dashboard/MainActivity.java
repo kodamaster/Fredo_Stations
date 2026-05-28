@@ -111,7 +111,14 @@ public class MainActivity extends Activity {
             "    headers: {'X-Requested-With': 'XMLHttpRequest'}" +
             "  })" +
             "  .then(function(r){ return r.text(); })" +
-            "  .then(function(html){" +
+            "  .then(function(text){" +
+            "    try {" +
+            // Extraire le HTML du JSON
+            "      var json = JSON.parse(text);" +
+            "      var html = json.html || text;" +
+            "    } catch(e) {" +
+            "      var html = text;" +
+            "    }" +
             "    var parser = new DOMParser();" +
             "    var doc = parser.parseFromString(html, 'text/html');" +
             "    var active = [];" +
@@ -120,7 +127,8 @@ public class MainActivity extends Activity {
             "      if(cells.length >= 2){" +
             "        cells[1].innerText.trim().split('\\n').forEach(function(line){" +
             "          var t = line.trim();" +
-            "          if(t.length > 0) active.push(t);" +
+            // Garder uniquement les numéros à 4 chiffres
+            "          if(t.length === 4 && t.match(/^\\d{4}$/)) active.push(t);" +
             "        });" +
             "      }" +
             "    });" +
