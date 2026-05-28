@@ -61,7 +61,7 @@ public class MainActivity extends Activity {
                         null
                     );
                 } else if (url.contains("/clientHistory/unfinished")) {
-                    handler.postDelayed(() -> extractRentals(view), 2000);
+                    extractRentals(view);
                 } else if (url.contains("/clientZones")) {
                     if (fetchingRentals) {
                         // On revient sur zones après avoir récupéré les trajets
@@ -113,29 +113,37 @@ public class MainActivity extends Activity {
     }
 
     private void extractRentals(WebView view) {
-        view.evaluateJavascript(
-            "(function(){" +
-            "  var active = [];" +
-            "  document.querySelectorAll('table tbody tr').forEach(function(row){" +
-            "    var cells = row.querySelectorAll('td');" +
-            "    if(cells.length >= 2){" +
-            "      cells[1].innerText.trim().split('\\n').forEach(function(line){" +
-            "        var t = line.trim();" +
-            "        if(t.length > 0) active.push(t);" +
-            "      });" +
-            "    }" +
-            "  });" +
-            "  return JSON.stringify(active);" +
-            "})()",
-            rentals -> {
-                String cleanRentals = (rentals != null && !rentals.equals("null") && !rentals.equals("\"null\""))
-                    ? rentals.substring(1, rentals.length() - 1).replace("\\\"", "\"")
-                    : "[]";
-                // Injecter directement sans repasser par clientZones
-                fetchingRentals = false;
-                injectDashboard(view, storedBikesJson, cleanRentals);
-            }
-        );
+        handler.postDelayed(() -> {
+            view.evaluateJavascript(
+                "(function(){" +
+                "  var rows = document.querySelectorAll('table tbody tr');" +
+                "  if(rows.length === 0) return 'EMPTY';" +
+                "  var active = [];" +
+                "  rows.forEach(function(row){" +
+                "    var cells = row.querySelectorAll('td');" +
+                "    if(cells.length >= 2){" +
+                "      cells[1].innerText.trim().split('\\n').forEach(function(line){" +
+                "        var t = line.trim();" +
+                "        if(t.length > 0) active.push(t);" +
+                "      });" +
+                "    }" +
+                "  });" +
+                "  return JSON.stringify(active);" +
+                "})()",
+                rentals -> {
+                    if (rentals != null && rentals.equals("\"EMPTY\"")) {
+                        // Tableau pas encore chargé, réessayer
+                        handler.postDelayed(() -> extractRentals(view), 1000);
+                        return;
+                    }
+                    String cleanRentals = (rentals != null && !rentals.equals("null") && !rentals.equals("\"null\""))
+                        ? rentals.substring(1, rentals.length() - 1).replace("\\\"", "\"")
+                        : "[]";
+                    fetchingRentals = false;
+                    injectDashboard(view, storedBikesJson, cleanRentals);
+                }
+            );
+        }, 2000);
     }
 
     private void injectDashboard(WebView view, String bikesJson, String rentalsJson) {
