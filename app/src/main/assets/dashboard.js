@@ -1,11 +1,9 @@
 (function(){
-  const data = __BIKES_DATA__;
-  const bikes = data.bikes;
-  const zonesRaw = data.zones;
+  const bikes = __DATA__.b;
+  const zonesRaw = bikes.zones;
+  const bikesCoords = bikes.bikes;
+  const activeRentals = __DATA__.r || [];
   const RADIUS = 50;
-
-  // Vélos en cours de location à exclure
-  const activeRentals = typeof __ACTIVE_RENTALS__ !== 'undefined' ? __ACTIVE_RENTALS__ : [];
 
   // =============================================
   // STATIONS EN DUR — modifier ici si besoin
@@ -33,7 +31,6 @@
     return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
   }
 
-  // Construire les zones avec centroïdes
   const ZONES = {};
   Object.entries(zonesRaw).forEach(([id, z]) => {
     const info = ZONE_NAMES[id] || {nom: 'Zone '+id, places: 0, ordre: 99};
@@ -45,16 +42,13 @@
     };
   });
 
-  // Assigner les vélos aux zones en excluant ceux en location
   const counts = {};
   Object.keys(ZONES).forEach(id => counts[id] = []);
   const outside = [];
 
-  Object.entries(bikes).forEach(([coord, ids]) => {
-    // Filtrer les vélos en cours de location
+  Object.entries(bikesCoords).forEach(([coord, ids]) => {
     const filteredIds = ids.filter(id => !activeRentals.includes(id));
     if (filteredIds.length === 0) return;
-
     const [lat, lng] = coord.split(',').map(Number);
     let bestId = null, bestDist = Infinity;
     for (const [id, z] of Object.entries(ZONES)) {
@@ -65,7 +59,7 @@
     else outside.push(...filteredIds);
   });
 
-  const total = Object.values(counts).reduce((s,v) => s+v.length, 0) + outside.length;
+  const total = Object.values(counts).reduce((s,v) => s+v.length, 0) + outside.length + activeRentals.length;
   const enStation = Object.values(counts).reduce((s,v) => s+v.length, 0);
   const enLocation = activeRentals.length;
   const now = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
@@ -221,7 +215,7 @@
     <div class="station" style="border-style:dashed">
       <div class="sh" onclick="toggle('rental')">
         <div class="sl2">
-          <div class="ico">
+          <div class="ico" style="background:rgba(168,85,247,.15)">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"/>
               <polyline points="12 6 12 12 16 14"/>
