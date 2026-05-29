@@ -124,6 +124,7 @@
   <div class="header">
     <div class="dot"></div>
     <div class="title">Vel'<span>in</span> — Flotte</div>
+    <div class="upd">Mis à jour à ${now}</div>
     <div class="rbtn" onclick="reload()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5b9bd5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
@@ -136,7 +137,7 @@
     <div class="stat"><div class="sv">${enStation}</div><div class="sl">En station</div></div>
     <div class="stat"><div class="sv">${enLocation}</div><div class="sl">En location</div></div>
   </div>
-  <div class="upd">Mis à jour à ${now} · ${Object.keys(ZONES).length} stations · locations: ${JSON.stringify(activeRentals)}</div>
+  <div class="upd">${Object.keys(ZONES).length} stations</div>
   <div class="stations">`;
 
   if (activeRentals.length > 0) {
