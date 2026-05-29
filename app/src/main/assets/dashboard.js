@@ -155,7 +155,7 @@
         </div>
         <div class="sr">
           <div><div class="cn" style="color:#a855f7">${activeRentals.length}</div><div class="cb">vélos</div></div>
-          <span class="badge purple">en cours</span>
+          <span class="badge purple">actifs</span>
           <svg id="chev-rental" class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M6 9l6 6 6-6"/>
           </svg>
@@ -169,7 +169,7 @@
         ${activeRentals.map(r => `
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;align-items:center">
           <span class="pill">#${r.id}</span>
-          <span class="pill" style="color:#a855f7;border-color:rgba(168,85,247,.3);text-transform:capitalize">${r.station}</span>
+          <span class="pill" style="text-transform:capitalize">${r.station}</span>
         </div>`).join('')}
       </div>
     </div>`;
@@ -179,7 +179,7 @@
     const pct = r.places > 0 ? Math.round(r.bikes.length / r.places * 100) : 0;
     const bc = pct >= 50 ? '#22c55e' : pct > 0 ? '#f59e0b' : '#ef4444';
     const badge = r.bikes.length === 0
-      ? `<span class="badge empty">&nbsp vide &nbsp</span>`
+      ? `<span class="badge empty">vide &nbsp</span>`
       : r.bikes.length <= r.places * .3
       ? `<span class="badge low">faible</span>`
       : `<span class="badge ok">dispo</span>`;
