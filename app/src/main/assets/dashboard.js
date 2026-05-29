@@ -2,7 +2,9 @@
   const bikes = __DATA__.b;
   const zonesRaw = bikes.zones;
   const bikesCoords = bikes.bikes;
-  const activeRentals = (__DATA__.r || []).filter(id => id.length === 4 && id.match(/^\d{4}$/));
+  // activeRentals est maintenant un tableau d'objets {id, station}
+  const activeRentals = (__DATA__.r || []).filter(r => r.id && r.id.length === 4);
+  const activeRentalIds = activeRentals.map(r => r.id);
   const RADIUS = 50;
 
   // =============================================
@@ -46,7 +48,7 @@
   Object.keys(ZONES).forEach(id => counts[id] = []);
 
   Object.entries(bikesCoords).forEach(([coord, ids]) => {
-    const filteredIds = ids.filter(id => id.length === 4 && !activeRentals.includes(id));
+    const filteredIds = ids.filter(id => id.length === 4 && !activeRentalIds.includes(id));
     if (filteredIds.length === 0) return;
     const [lat, lng] = coord.split(',').map(Number);
     let bestId = null, bestDist = Infinity;
@@ -153,15 +155,22 @@
         </div>
         <div class="sr">
           <div><div class="cn" style="color:#a855f7">${activeRentals.length}</div><div class="cb">vélos</div></div>
-          <span class="badge purple">actifs</span>
+          <span class="badge purple">en cours</span>
           <svg id="chev-rental" class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M6 9l6 6 6-6"/>
           </svg>
         </div>
       </div>
       <div class="sbody" id="body-rental">
-        <div class="blbl">Numéros des vélos</div>
-        <div class="bgrid">${activeRentals.map(b => `<span class="pill">#${b}</span>`).join('')}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+          <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px">Numéros des vélos</div>
+          <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px">Station de départ</div>
+        </div>
+        ${activeRentals.map(r => `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;align-items:center">
+          <span class="pill">#${r.id}</span>
+          <span class="pill" style="color:#a855f7;border-color:rgba(168,85,247,.3);text-transform:capitalize">${r.station}</span>
+        </div>`).join('')}
       </div>
     </div>`;
   }
