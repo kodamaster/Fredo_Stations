@@ -2,7 +2,7 @@
   const bikes = __DATA__.b;
   const zonesRaw = bikes.zones;
   const bikesCoords = bikes.bikes;
-  const activeRentals = __DATA__.r || [];
+  const activeRentals = (__DATA__.r || []).filter(id => id.length === 4 && id.match(/^\d{4}$/));
   const RADIUS = 50;
 
   // =============================================
@@ -44,10 +44,9 @@
 
   const counts = {};
   Object.keys(ZONES).forEach(id => counts[id] = []);
-  const outside = [];
 
   Object.entries(bikesCoords).forEach(([coord, ids]) => {
-    const filteredIds = ids.filter(id => !activeRentals.includes(id));
+    const filteredIds = ids.filter(id => id.length === 4 && !activeRentals.includes(id));
     if (filteredIds.length === 0) return;
     const [lat, lng] = coord.split(',').map(Number);
     let bestId = null, bestDist = Infinity;
@@ -56,12 +55,11 @@
       if (d < RADIUS && d < bestDist) { bestDist = d; bestId = id; }
     }
     if (bestId) counts[bestId].push(...filteredIds);
-    else outside.push(...filteredIds);
   });
 
-  const total = enStation + enLocation;
   const enStation = Object.values(counts).reduce((s,v) => s+v.length, 0);
   const enLocation = activeRentals.length;
+  const total = enStation + enLocation;
   const now = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
   const rows = Object.entries(ZONES)
     .map(([id,z]) => ({id, nom:z.nom, places:z.places, ordre:z.ordre, bikes:counts[id]}))
@@ -123,7 +121,7 @@
   let html = `<style>${css}</style>
   <div class="header">
     <div class="dot"></div>
-    <div class="title">Vel'<span>in</span> — Flotte</div>
+    <div class="title">Fredo Stations</div>
     <div style="font-size:11px;color:#6b7280;font-family:monospace;margin-right:8px">${now}</div>
     <div class="rbtn" onclick="reload()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5b9bd5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -131,7 +129,7 @@
         <path d="M21 3v5h-5"/>
       </svg>
     </div>
-  </div>`;
+  </div>
   <div class="stats">
     <div class="stat"><div class="sv">${total}</div><div class="sl">Total</div></div>
     <div class="stat"><div class="sv">${enStation}</div><div class="sl">En station</div></div>
