@@ -183,10 +183,16 @@ public class MainActivity extends Activity {
             "    var active = [];" +
             "    doc.querySelectorAll('table tbody tr').forEach(function(row){" +
             "      var cells = row.querySelectorAll('td');" +
-            "      if(cells.length >= 2){" +
+            "      if(cells.length >= 3){" +
+            "        var station = '';" +
+            "        var cell2 = cells[2].innerText.trim();" +
+            "        var parts = cell2.split('•');" +
+            "        if(parts.length > 1) station = parts[1].trim();" +
             "        cells[1].innerText.trim().split('\\n').forEach(function(line){" +
             "          var t = line.trim();" +
-            "          if(t.length === 4 && t.match(/^\\d{4}$/)) active.push(t);" +
+            "          if(t.length === 4 && t.match(/^\\d{4}$/)){" +
+            "            active.push({id: t, station: station});" +
+            "          }" +
             "        });" +
             "      }" +
             "    });" +
