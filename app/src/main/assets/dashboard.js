@@ -59,7 +59,7 @@
     else outside.push(...filteredIds);
   });
 
-  const total = Object.values(counts).reduce((s,v) => s+v.length, 0) + outside.length + activeRentals.length;
+  const total = enStation + enLocation;
   const enStation = Object.values(counts).reduce((s,v) => s+v.length, 0);
   const enLocation = activeRentals.length;
   const now = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
@@ -139,6 +139,34 @@
   <div class="upd">Mis à jour à ${now} · ${Object.keys(ZONES).length} stations · locations: ${JSON.stringify(activeRentals)}</div>
   <div class="stations">`;
 
+  if (activeRentals.length > 0) {
+    html += `
+    <div class="station" style="border-style:dashed">
+      <div class="sh" onclick="toggle('rental')">
+        <div class="sl2">
+          <div class="ico" style="background:rgba(168,85,247,.15)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <div><div class="sn" style="color:#a855f7">En location</div><div class="sm">trajets en cours</div></div>
+        </div>
+        <div class="sr">
+          <div><div class="cn" style="color:#a855f7">${activeRentals.length}</div><div class="cb">vélos</div></div>
+          <span class="badge purple">en cours</span>
+          <svg id="chev-rental" class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </div>
+      </div>
+      <div class="sbody" id="body-rental">
+        <div class="blbl">Numéros des vélos</div>
+        <div class="bgrid">${activeRentals.map(b => `<span class="pill">#${b}</span>`).join('')}</div>
+      </div>
+    </div>`;
+  }
+
   rows.forEach(r => {
     const pct = r.places > 0 ? Math.round(r.bikes.length / r.places * 100) : 0;
     const bc = pct >= 50 ? '#22c55e' : pct > 0 ? '#f59e0b' : '#ef4444';
@@ -181,62 +209,6 @@
       </div>
     </div>`;
   });
-
-  if (outside.length > 0) {
-    html += `
-    <div class="station" style="border-style:dashed">
-      <div class="sh" onclick="toggle('out')">
-        <div class="sl2">
-          <div class="ico">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5b9bd5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-              <circle cx="12" cy="9" r="2.5"/>
-            </svg>
-          </div>
-          <div><div class="sn" style="color:#6b7280">Hors station</div><div class="sm">non rattachés</div></div>
-        </div>
-        <div class="sr">
-          <div><div class="cn" style="color:#6b7280">${outside.length}</div><div class="cb">vélos</div></div>
-          <span class="badge blue">hors zone</span>
-          <svg id="chev-out" class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M6 9l6 6 6-6"/>
-          </svg>
-        </div>
-      </div>
-      <div class="sbody" id="body-out">
-        <div class="blbl">Numéros des vélos</div>
-        <div class="bgrid">${outside.map(b => `<span class="pill">#${b}</span>`).join('')}</div>
-      </div>
-    </div>`;
-  }
-
-  if (activeRentals.length > 0) {
-    html += `
-    <div class="station" style="border-style:dashed">
-      <div class="sh" onclick="toggle('rental')">
-        <div class="sl2">
-          <div class="ico" style="background:rgba(168,85,247,.15)">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <polyline points="12 6 12 12 16 14"/>
-            </svg>
-          </div>
-          <div><div class="sn" style="color:#a855f7">En location</div><div class="sm">trajets en cours</div></div>
-        </div>
-        <div class="sr">
-          <div><div class="cn" style="color:#a855f7">${activeRentals.length}</div><div class="cb">vélos</div></div>
-          <span class="badge purple">en cours</span>
-          <svg id="chev-rental" class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M6 9l6 6 6-6"/>
-          </svg>
-        </div>
-      </div>
-      <div class="sbody" id="body-rental">
-        <div class="blbl">Numéros des vélos</div>
-        <div class="bgrid">${activeRentals.map(b => `<span class="pill">#${b}</span>`).join('')}</div>
-      </div>
-    </div>`;
-  }
 
   html += `</div>`;
   document.open();
