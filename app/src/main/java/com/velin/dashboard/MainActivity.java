@@ -6,10 +6,16 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.webkit.*;
 import android.graphics.Color;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
     private WebView webView;
+    private View overlay;
     private static final String BACKOFFICE = "https://backoffice-fredo-prod.apnl.info";
     private final Handler handler = new Handler();
     private String storedBikesJson = null;
@@ -22,8 +28,25 @@ public class MainActivity extends Activity {
         getWindow().setStatusBarColor(Color.parseColor("#0d0f14"));
         getWindow().setNavigationBarColor(Color.parseColor("#0d0f14"));
 
+        // FrameLayout principal
+        FrameLayout frameLayout = new FrameLayout(this);
+        frameLayout.setBackgroundColor(Color.parseColor("#0d0f14"));
+
+        // WebView
         webView = new WebView(this);
-        setContentView(webView);
+        frameLayout.addView(webView, new FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        ));
+
+        // Overlay de chargement
+        overlay = buildOverlay();
+        frameLayout.addView(overlay, new FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        ));
+
+        setContentView(frameLayout);
 
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
@@ -60,6 +83,7 @@ public class MainActivity extends Activity {
                         null
                     );
                 } else if (url.contains("/clientZones")) {
+                    showOverlay();
                     handler.postDelayed(() -> tryInject(view, 0), 3000);
                 } else if (url.contains("/client")) {
                     view.loadUrl(BACKOFFICE + "/clientZones/");
@@ -70,8 +94,44 @@ public class MainActivity extends Activity {
         webView.loadUrl(BACKOFFICE + "/log-in");
     }
 
+    private View buildOverlay() {
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setBackgroundColor(Color.parseColor("#0d0f14"));
+        layout.setGravity(android.view.Gravity.CENTER);
+
+        // Titre
+        TextView title = new TextView(this);
+        title.setText("Fredo Stations");
+        title.setTextColor(Color.parseColor("#f0f2f7"));
+        title.setTextSize(24);
+        title.setTypeface(null, android.graphics.Typeface.BOLD);
+        title.setGravity(android.view.Gravity.CENTER);
+        layout.addView(title);
+
+        // Spinner
+        ProgressBar spinner = new ProgressBar(this);
+        spinner.setIndeterminate(true);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(80, 80);
+        params.topMargin = 40;
+        params.gravity = android.view.Gravity.CENTER;
+        spinner.setLayoutParams(params);
+        layout.addView(spinner);
+
+        return layout;
+    }
+
+    private void showOverlay() {
+        runOnUiThread(() -> overlay.setVisibility(View.VISIBLE));
+    }
+
+    private void hideOverlay() {
+        runOnUiThread(() -> overlay.setVisibility(View.GONE));
+    }
+
     private void tryInject(WebView view, int attempt) {
         if (attempt > 10) {
+            hideOverlay();
             view.evaluateJavascript(
                 "document.body.style.visibility='visible';" +
                 "document.body.innerHTML='<div style=\"color:red;padding:40px;font-family:sans-serif\">Erreur: données introuvables</div>';",
@@ -113,7 +173,6 @@ public class MainActivity extends Activity {
             "  .then(function(r){ return r.text(); })" +
             "  .then(function(text){" +
             "    try {" +
-            // Extraire le HTML du JSON
             "      var json = JSON.parse(text);" +
             "      var html = json.html || text;" +
             "    } catch(e) {" +
@@ -127,7 +186,6 @@ public class MainActivity extends Activity {
             "      if(cells.length >= 2){" +
             "        cells[1].innerText.trim().split('\\n').forEach(function(line){" +
             "          var t = line.trim();" +
-            // Garder uniquement les numéros à 4 chiffres
             "          if(t.length === 4 && t.match(/^\\d{4}$/)) active.push(t);" +
             "        });" +
             "      }" +
@@ -145,6 +203,7 @@ public class MainActivity extends Activity {
 
     private void pollRentals(WebView view, int attempt) {
         if (attempt > 20) {
+            hideOverlay();
             injectDashboard(view, storedBikesJson, "[]");
             return;
         }
@@ -154,6 +213,7 @@ public class MainActivity extends Activity {
                 result -> {
                     if (result != null && !result.equals("null") && !result.equals("\"null\"")) {
                         String cleanRentals = result.substring(1, result.length() - 1).replace("\\\"", "\"");
+                        hideOverlay();
                         injectDashboard(view, storedBikesJson, cleanRentals);
                     } else {
                         pollRentals(view, attempt + 1);
@@ -173,6 +233,7 @@ public class MainActivity extends Activity {
             String init = "var __DATA__ = {b:" + bikesJson + ", r:" + rentalsJson + "}; " + js;
             view.evaluateJavascript(init, null);
         } catch (Exception e) {
+            hideOverlay();
             view.evaluateJavascript(
                 "document.body.style.visibility='visible';" +
                 "document.body.innerHTML='<div style=\"color:red;padding:40px\">Erreur: " + e.getMessage() + "</div>';",
