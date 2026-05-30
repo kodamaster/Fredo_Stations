@@ -39,6 +39,13 @@ public class MainActivity extends Activity {
             FrameLayout.LayoutParams.MATCH_PARENT
         ));
 
+        webView.addJavascriptInterface(new Object() {
+            @android.webkit.JavascriptInterface
+            public void showLoading() {
+                showOverlay();
+            }
+        }, "Android");
+
         // Overlay de chargement
         overlay = buildOverlay();
         frameLayout.addView(overlay, new FrameLayout.LayoutParams(
