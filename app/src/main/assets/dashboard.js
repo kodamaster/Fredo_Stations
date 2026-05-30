@@ -162,13 +162,13 @@
         </div>
       </div>
       <div class="sbody" id="body-rental">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">
           <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px">Numéros des vélos</div>
           <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px">Station de départ</div>
         </div>
         ${activeRentals.map(r => `
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;align-items:center">
-          <span class="pill">#${r.id}</span>
+          <span class="pill">${r.id}</span>
           <span class="pill" style="text-transform:capitalize">${r.station}</span>
         </div>`).join('')}
       </div>
@@ -184,7 +184,7 @@
       ? `<span class="badge low">faible</span>`
       : `<span class="badge ok">dispo</span>`;
     const pills = r.bikes.length > 0
-      ? r.bikes.map(b => `<span class="pill">#${b}</span>`).join('')
+      ? r.bikes.map(b => `<span class="pill">${b}</span>`).join('')
       : `<span style="color:#6b7280;font-size:13px">Aucun vélo</span>`;
 
     html += `
