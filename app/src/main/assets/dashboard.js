@@ -118,7 +118,10 @@
     if (c) c.style.transform = openState[id] ? 'rotate(180deg)' : '';
   }
   window.toggle = toggle;
-  window.reload = () => window.location.reload();
+  window.reload = () => {
+    if(typeof Android !== 'undefined') Android.showLoading();
+    window.location.reload();
+  };
 
   let html = `<style>${css}</style>
   <div class="header">
