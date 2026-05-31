@@ -172,7 +172,7 @@
         </div>
         ${activeRentals.map(r => `
         <div style="display:grid;grid-template-columns:80px 1fr 1fr;gap:6px;margin-bottom:6px;padding-top:12px;align-items:center">
-          <span class="pill">#${r.id}</span>
+          <span class="pill">${r.id}</span>
           <span class="pill" style="text-transform:capitalize">${r.station}</span>
           <span class="pill">${r.heure}</span>
         </div>`).join('')}
