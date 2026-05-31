@@ -171,7 +171,7 @@
           <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;text-align:left;margin-left:3px">Date</div>
         </div>
         ${activeRentals.map(r => `
-        <div style="display:grid;grid-template-columns:60px 1fr 110px;gap:6px;margin-bottom:6px;align-items:center">
+        <div style="display:grid;grid-template-columns:50px 1fr 105px;gap:6px;margin-bottom:6px;align-items:center">
           <span class="pill" style="${r.type === 'maintenance' ? 'border-color:#f59e0b' : ''}">${r.id}</span>
           <span class="pill" style="text-align:left;text-transform:capitalize;${r.type === 'maintenance' ? 'border-color:#f59e0b' : ''}">${r.station}</span>
           <span class="pill" style="letter-spacing:-0.5px;font-size:11px;${r.type === 'maintenance' ? 'border-color:#f59e0b' : ''}">${r.heure}</span>
