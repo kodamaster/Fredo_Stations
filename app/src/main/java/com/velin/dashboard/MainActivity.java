@@ -170,61 +170,56 @@ public class MainActivity extends Activity {
     }
 
     private void fetchRentalsViaFetch(WebView view) {
-        view.evaluateJavascript(
-            "(function(){" +
-            "  window.__RENTALS_READY__ = undefined;" +
-            "  fetch('/clientHistory/unfinished', {" +
-            "    credentials: 'include'," +
-            "    headers: {'X-Requested-With': 'XMLHttpRequest'}" +
-            "  })" +
-            "  .then(function(r){ return r.text(); })" +
-            "  .then(function(text){" +
-            "    try {" +
-            "      var json = JSON.parse(text);" +
-            "      var html = json.html || text;" +
-            "    } catch(e) {" +
-            "      var html = text;" +
-            "    }" +
-            "    var parser = new DOMParser();" +
-            "    var doc = parser.parseFromString(html, 'text/html');" +
-            "    var active = [];" +
-            "    doc.querySelectorAll('table tbody tr').forEach(function(row){" +
-            "      var cells = row.querySelectorAll('td');" +
-            "      if(cells.length >= 3){" +
-            "        var station = '';" +
-            "        var cell2 = cells[2].innerText.trim();" +
-            "        var parts = cell2.split('•');" +
-            "        if(parts.length > 1) station = parts[1].trim();" +
-            "        cells[1].innerText.trim().split('\\n').forEach(function(line){" +
-            "          var t = line.trim();" +
-            "          if(t.length === 4 && t.match(/^\\d{4}$/)){" +
-            "            var cell2 = cells[2].innerText.trim();" +
-            "            var parts = cell2.split('•');" +
-            "            var station = parts.length > 1 ? parts[1].trim() : '';" +
-            "            var dateHeure = parts.length > 0 ? parts[0].trim() : '';" +
-            // Reformater la date : "28/05/2026 09:55" -> "28/05/26 - 09:55"
-            "            if(dateHeure){" +
-            "              var dp = dateHeure.split(' ');" +
-            "              if(dp.length >= 2){" +
-            "                var datePart = dp[0].replace(/(\d{2})\/(\d{2})\/\d{2}(\d{2})/, '$1/$2/$3');" +
-            "                dateHeure = datePart + ' - ' + dp[1];" +
-            "              }" +
-            "            }" +
-            "            active.push({id: t, station: station, heure: dateHeure});" +
-            "          }" +
-            "        });" +
-            "      }" +
-            "    });" +
-            "    window.__RENTALS_READY__ = JSON.stringify(active);" +
-            "  })" +
-            "  .catch(function(e){" +
-            "    window.__RENTALS_READY__ = '[]';" +
-            "  });" +
-            "})()",
-            null
-        );
-        pollRentals(view, 0);
-    }
+    view.evaluateJavascript(
+        "(function(){" +
+        "  window.__RENTALS_READY__ = undefined;" +
+        "  fetch('/clientHistory/unfinished', {" +
+        "    credentials: 'include'," +
+        "    headers: {'X-Requested-With': 'XMLHttpRequest'}" +
+        "  })" +
+        "  .then(function(r){ return r.text(); })" +
+        "  .then(function(text){" +
+        "    try {" +
+        "      var json = JSON.parse(text);" +
+        "      var html = json.html || text;" +
+        "    } catch(e) {" +
+        "      var html = text;" +
+        "    }" +
+        "    var parser = new DOMParser();" +
+        "    var doc = parser.parseFromString(html, 'text/html');" +
+        "    var active = [];" +
+        "    doc.querySelectorAll('table tbody tr').forEach(function(row){" +
+        "      var cells = row.querySelectorAll('td');" +
+        "      if(cells.length >= 3){" +
+        "        var cell2 = cells[2].innerText.trim();" +
+        "        var parts = cell2.split('\\u2022');" +
+        "        var station = parts.length > 1 ? parts[1].trim() : '';" +
+        "        var dateHeure = parts.length > 0 ? parts[0].trim() : '';" +
+        "        if(dateHeure){" +
+        "          var dp = dateHeure.split(' ');" +
+        "          if(dp.length >= 2){" +
+        "            var datePart = dp[0].replace(/(\\d{2})\\/(\\d{2})\\/\\d{2}(\\d{2})/, '$1/$2/$3');" +
+        "            dateHeure = datePart + ' - ' + dp[1];" +
+        "          }" +
+        "        }" +
+        "        cells[1].innerText.trim().split('\\n').forEach(function(line){" +
+        "          var t = line.trim();" +
+        "          if(t.length === 4 && t.match(/^\\d{4}$/)){" +
+        "            active.push({id: t, station: station, heure: dateHeure});" +
+        "          }" +
+        "        });" +
+        "      }" +
+        "    });" +
+        "    window.__RENTALS_READY__ = JSON.stringify(active);" +
+        "  })" +
+        "  .catch(function(e){" +
+        "    window.__RENTALS_READY__ = '[]';" +
+        "  });" +
+        "})()",
+        null
+    );
+    pollRentals(view, 0);
+}
 
     private void pollRentals(WebView view, int attempt) {
         if (attempt > 20) {
