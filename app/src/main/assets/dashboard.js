@@ -182,7 +182,7 @@
   
   rows.forEach(r => {
     const pct = r.places > 0 ? Math.round(r.bikes.length / r.places * 100) : 0;
-    const bc = pct >= 50 ? '#22c55e' : pct > 0 ? '#f59e0b' : '#ef4444';
+    const bc = pct === 0 ? '#ef4444' : pct >= 100 ? '#ef4444' : pct <= 30 ? '#f59e0b' : '#22c55e';
     const badge = r.bikes.length === 0
       ? `<span class="badge empty">vide &nbsp</span>`
       : r.bikes.length <= r.places * .3
