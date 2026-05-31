@@ -165,13 +165,13 @@
         </div>
       </div>
       <div class="sbody" id="body-rental">
-        <div style="display:grid;grid-template-columns:60px 1fr 110px;gap:6px;margin-bottom:8px;margin-top:12px">
+        <div style="display:grid;grid-template-columns:50px 1fr 100px;gap:6px;margin-bottom:8px;margin-top:12px">
           <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;text-align:left;margin-left:5px">Numéro</div>
           <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;text-align:left;margin-left:5px">Station de départ</div>
           <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;text-align:left;margin-left:5px">Date</div>
         </div>
         ${activeRentals.map(r => `
-        <div style="display:grid;grid-template-columns:60px 1fr 110px;gap:6px;margin-bottom:6px;padding-top:6px;align-items:center">
+        <div style="display:grid;grid-template-columns:50px 1fr 100px;gap:6px;margin-bottom:6px;padding-top:6px;align-items:center">
           <span class="pill">${r.id}</span>
           <span class="pill" style="text-transform:capitalize">${r.station}</span>
           <span class="pill" style="letter-spacing:-0.5px;font-size:11px">${r.heure}</span>
