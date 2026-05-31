@@ -187,6 +187,8 @@
       ? `<span class="badge empty">vide &nbsp</span>`
       : r.bikes.length <= r.places * .3
       ? `<span class="badge low">faible</span>`
+      : r.bikes.length >= r.places
+      ? `<span class="badge empty">pleine</span>`
       : `<span class="badge ok">dispo</span>`;
     const pills = r.bikes.length > 0
       ? r.bikes.map(b => `<span class="pill">${b}</span>`).join('')
