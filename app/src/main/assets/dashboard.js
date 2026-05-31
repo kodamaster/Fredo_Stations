@@ -165,18 +165,20 @@
         </div>
       </div>
       <div class="sbody" id="body-rental">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;padding-top:5px;">
-          <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px">Numéros des vélos</div>
-          <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px">Station de départ</div>
-        </div>
-        ${activeRentals.map(r => `
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;align-items:center">
-          <span class="pill">${r.id}</span>
-          <span class="pill" style="text-transform:capitalize">${r.station}</span>
-        </div>`).join('')}
+        <div style="display:grid;grid-template-columns:80px 1fr 1fr;gap:6px;margin-bottom:8px">
+        <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px">Numéro</div>
+        <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px">Station de départ</div>
+        <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px">Heure</div>
       </div>
-    </div>`;
-  }
+      ${activeRentals.map(r => `
+      <div style="display:grid;grid-template-columns:80px 1fr 1fr;gap:6px;margin-bottom:6px;align-items:center">
+        <span class="pill">#${r.id}</span>
+        <span class="pill" style="text-transform:capitalize">${r.station}</span>
+        <span class="pill">${r.heure}</span>
+      </div>`).join('')}
+            </div>
+          </div>`;
+        }
 
   rows.forEach(r => {
     const pct = r.places > 0 ? Math.round(r.bikes.length / r.places * 100) : 0;
