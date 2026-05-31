@@ -171,7 +171,7 @@
           <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px">Heure</div>
         </div>
         ${activeRentals.map(r => `
-        <div style="display:grid;grid-template-columns:80px 1fr 1fr;gap:6px;margin-bottom:6px;padding-top:12px;align-items:center">
+        <div style="display:grid;grid-template-columns:60px 1fr auto;gap:6px;margin-bottom:6px;padding-top:12px;align-items:center">
           <span class="pill">${r.id}</span>
           <span class="pill" style="text-transform:capitalize">${r.station}</span>
           <span class="pill">${r.heure}</span>
