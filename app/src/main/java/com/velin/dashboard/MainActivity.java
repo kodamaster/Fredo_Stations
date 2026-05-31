@@ -198,7 +198,7 @@ public class MainActivity extends Activity {
         "        if(dateHeure){" +
         "          var dp = dateHeure.split(' ');" +
         "          if(dp.length >= 2){" +
-        "            var datePart = dp[0].replace(/(\\d{2})\\/(\\d{2})\\/\\d{2}(\\d{2})/, '$1/$2/$3');" +
+        "            var datePart = dp[0].replace(/(\\d{2})\\/(\\d{2})\\/\\d{4}/, '$1/$2');" +
         "            dateHeure = datePart + ' - ' + dp[1];" +
         "          }" +
         "        }" +
