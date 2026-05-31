@@ -70,7 +70,7 @@
   const css = `
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
     body{background:#0d0f14;color:#f0f2f7;font-family:-apple-system,sans-serif;min-height:100vh}
-    .header{position:sticky;top:0;background:rgba(13,15,20,.97);border-bottom:1px solid rgba(255,255,255,.07);padding:40px 16px 12px;display:flex;align-items:center;justify-content:space-between}
+    .header{position:relative;top:0;background:rgba(13,15,20,.97);border-bottom:1px solid rgba(255,255,255,.07);padding:40px 16px 12px;display:flex;align-items:center;justify-content:space-between}
     .dot{width:8px;height:8px;border-radius:50%;background:#5b9bd5;box-shadow:0 0 8px #5b9bd5;animation:pulse 2s infinite;margin-right:10px;flex-shrink:0}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
     .title{font-size:17px;font-weight:700;flex:1}.title span{color:#5b9bd5}
