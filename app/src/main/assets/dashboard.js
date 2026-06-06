@@ -3,8 +3,10 @@
   const zonesRaw = bikes.zones;
   const bikesCoords = bikes.bikes;
   // activeRentals est maintenant un tableau d'objets {id, station}
-  const activeRentals = (__DATA__.r || []).filter(r => r.id && r.id.length === 4);
+  const activeRentals = (__DATA__.r || []).filter(r => r.id && /^\d{4,6}$/.test(r.id));
   const activeRentalIds = activeRentals.map(r => r.id);
+  const clientRentals = activeRentals.filter(r => r.type !== 'maintenance');
+  const maintenanceRentals = activeRentals.filter(r => r.type === 'maintenance');
   const RADIUS = 50;
 
   // =============================================
@@ -62,6 +64,8 @@
   const enStation = Object.values(counts).reduce((s,v) => s+v.length, 0);
   const enLocation = activeRentals.length;
   const total = enStation + enLocation;
+  const enLocationClient = clientRentals.length;
+  const enLocationMaint = maintenanceRentals.length;
   const now = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
   const rows = Object.entries(ZONES)
     .map(([id,z]) => ({id, nom:z.nom, places:z.places, ordre:z.ordre, bikes:counts[id]}))
@@ -135,47 +139,81 @@
       </svg>
     </div>
   </div>
-  <div class="stats">
-    <div class="stat"><div class="sv">${total}</div><div class="sl">Total</div></div>
+  <div class="stats" style="grid-template-columns:repeat(2,1fr)">
+    <div class="stat"><div class="sv">${total}</div><div class="sl">Total flotte</div></div>
     <div class="stat"><div class="sv">${enStation}</div><div class="sl">En station</div></div>
-    <div class="stat"><div class="sv">${enLocation}</div><div class="sl">En location</div></div>
+    <div class="stat"><div class="sv" style="color:#a855f7">${enLocationClient}</div><div class="sl">Location client</div></div>
+    <div class="stat"><div class="sv" style="color:#f59e0b">${enLocationMaint}</div><div class="sl">Maintenance</div></div>
   </div>
   <div class="upd">${Object.keys(ZONES).length} stations</div>
   <div class="stations">`;
 
-  if (activeRentals.length > 0) {
+  function rentalRows(list, color) {
+    return list.map(r => {
+      const coordMatch = r.station.match(/(-?\d+\.\d+)\s+(-?\d+\.\d+)/);
+      const stationLabel = coordMatch
+        ? `GPS ${parseFloat(coordMatch[1]).toFixed(4)}, ${parseFloat(coordMatch[2]).toFixed(4)}`
+        : r.station;
+      return `
+      <div style="display:grid;grid-template-columns:65px 1fr 105px;gap:6px;margin-bottom:6px;align-items:center">
+        <span class="pill" style="border-color:${color}">${r.id}</span>
+        <span class="pill" style="text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-color:${color}">${stationLabel}</span>
+        <span class="pill" style="letter-spacing:-0.5px;font-size:11px;border-color:${color}">${r.heure}</span>
+      </div>`;
+    }).join('');
+  }
+  function rentalHeader() {
+    return `<div style="display:grid;grid-template-columns:65px 1fr 105px;gap:6px;margin-bottom:8px;margin-top:12px">
+      <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-left:3px">Numéro</div>
+      <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-left:3px">Départ</div>
+      <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-left:3px">Heure</div>
+    </div>`;
+  }
+
+  if (clientRentals.length > 0) {
     html += `
     <div class="station" style="border-style:dashed">
-      <div class="sh" onclick="toggle('rental')">
+      <div class="sh" onclick="toggle('rental-client')">
         <div class="sl2">
           <div class="ico" style="background:rgba(168,85,247,.15)">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <polyline points="12 6 12 12 16 14"/>
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
             </svg>
           </div>
-          <div><div class="sn" style="color:#a855f7">En location</div><div class="sm">trajets en cours</div></div>
+          <div><div class="sn" style="color:#a855f7">Location client</div><div class="sm">trajets en cours</div></div>
         </div>
         <div class="sr">
-          <div><div class="cn" style="color:#a855f7">${activeRentals.length}</div><div class="cb">vélos</div></div>
+          <div><div class="cn" style="color:#a855f7">${clientRentals.length}</div><div class="cb">vélos</div></div>
           <span class="badge purple">actifs</span>
-          <svg id="chev-rental" class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M6 9l6 6 6-6"/>
-          </svg>
+          <svg id="chev-rental-client" class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
         </div>
       </div>
-      <div class="sbody" id="body-rental">
-        <div style="display:grid;grid-template-columns:50px 1fr 105px;gap:6px;margin-bottom:8px;margin-top:12px">
-          <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;text-align:left;margin-left:3px">Numéro</div>
-          <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;text-align:left;margin-left:3px">Station de départ</div>
-          <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;text-align:left;margin-left:3px">Date</div>
+      <div class="sbody" id="body-rental-client">
+        ${rentalHeader()}${rentalRows(clientRentals, '#a855f7')}
+      </div>
+    </div>`;
+  }
+
+  if (maintenanceRentals.length > 0) {
+    html += `
+    <div class="station" style="border-style:dashed;border-color:rgba(245,158,11,.3)">
+      <div class="sh" onclick="toggle('rental-maint')">
+        <div class="sl2">
+          <div class="ico" style="background:rgba(245,158,11,.12)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+            </svg>
+          </div>
+          <div><div class="sn" style="color:#f59e0b">Maintenance</div><div class="sm">vélos en service</div></div>
         </div>
-        ${activeRentals.map(r => `
-        <div style="display:grid;grid-template-columns:50px 1fr 105px;gap:6px;margin-bottom:6px;align-items:center">
-          <span class="pill" style="${r.type === 'maintenance' ? 'border-color:#f59e0b' : ''}">${r.id}</span>
-          <span class="pill" style="text-align:left;text-transform:capitalize;${r.type === 'maintenance' ? 'border-color:#f59e0b' : ''}">${r.station}</span>
-          <span class="pill" style="letter-spacing:-0.5px;font-size:11px;${r.type === 'maintenance' ? 'border-color:#f59e0b' : ''}">${r.heure}</span>
-        </div>`).join('')}
+        <div class="sr">
+          <div><div class="cn" style="color:#f59e0b">${maintenanceRentals.length}</div><div class="cb">vélos</div></div>
+          <span class="badge low">en cours</span>
+          <svg id="chev-rental-maint" class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+      <div class="sbody" id="body-rental-maint">
+        ${rentalHeader()}${rentalRows(maintenanceRentals, '#f59e0b')}
       </div>
     </div>`;
   }
