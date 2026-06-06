@@ -180,23 +180,43 @@ public class MainActivity extends Activity {
             "    doc.querySelectorAll('table tbody tr').forEach(function(row){" +
             "      var cells = row.querySelectorAll('td');" +
             "      if(cells.length >= 3){" +
-            "        var cell2 = cells[2].innerText.trim();" +
-            "        var parts = cell2.split('\\u2022');" +
-            "        var station = parts.length > 1 ? parts[1].trim() : '';" +
-            "        var dateHeure = parts.length > 0 ? parts[0].trim() : '';" +
-            "        if(dateHeure){" +
-            "          var dp = dateHeure.split(' ');" +
-            "          if(dp.length >= 2){" +
-            "            var datePart = dp[0].replace(/(\\d{2})\\/(\\d{2})\\/\\d{4}/, '$1/$2');" +
-            "            dateHeure = datePart + ' - ' + dp[1];" +
+            "        var station = '', dateHeure = '';" +
+            "        if(type === 'maintenance'){" +
+            "          dateHeure = cells[2].innerText.trim();" +
+            "          var cell3 = cells.length > 3 ? cells[3].innerText.trim() : '';" +
+            "          station = cell3 || 'Maintenance';" +
+            "          if(dateHeure){" +
+            "            var dp = dateHeure.split(' ');" +
+            "            if(dp.length >= 2){" +
+            "              var datePart = dp[0].replace(/(\\d{2})\\/(\\d{2})\\/\\d{2,4}/, '$1/$2');" +
+            "              dateHeure = datePart + ' - ' + dp[1].substring(0,5);" +
+            "            }" +
             "          }" +
+            "          cells[1].innerText.trim().split('\\n').forEach(function(line){" +
+            "            var t = line.trim();" +
+            "            if(t.match(/^\\d{4,6}$/)){" +
+            "              active.push({id: t, station: station, heure: dateHeure, type: type});" +
+            "            }" +
+            "          });" +
+            "        } else {" +
+            "          var cell2 = cells[2].innerText.trim();" +
+            "          var parts = cell2.split('\\u2022');" +
+            "          station = parts.length > 1 ? parts[1].trim() : '';" +
+            "          dateHeure = parts.length > 0 ? parts[0].trim() : '';" +
+            "          if(dateHeure){" +
+            "            var dp = dateHeure.split(' ');" +
+            "            if(dp.length >= 2){" +
+            "              var datePart = dp[0].replace(/(\\d{2})\\/(\\d{2})\\/\\d{4}/, '$1/$2');" +
+            "              dateHeure = datePart + ' - ' + dp[1];" +
+            "            }" +
+            "          }" +
+            "          cells[1].innerText.trim().split('\\n').forEach(function(line){" +
+            "            var t = line.trim();" +
+            "            if(t.length === 4 && t.match(/^\\d{4}$/)){" +
+            "              active.push({id: t, station: station, heure: dateHeure, type: type});" +
+            "            }" +
+            "          });" +
             "        }" +
-            "        cells[1].innerText.trim().split('\\n').forEach(function(line){" +
-            "          var t = line.trim();" +
-            "          if(t.length === 4 && t.match(/^\\d{4}$/)){" +
-            "            active.push({id: t, station: station, heure: dateHeure, type: type});" +
-            "          }" +
-            "        });" +
             "      }" +
             "    });" +
             "    return active;" +
