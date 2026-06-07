@@ -140,10 +140,10 @@
     </div>
   </div>
   <div class="stats" style="grid-template-columns:repeat(2,1fr)">
-    <div class="stat"><div class="sv">${total}</div><div class="sl">Total flotte</div></div>
-    <div class="stat"><div class="sv">${enStation}</div><div class="sl">En station</div></div>
-    <div class="stat"><div class="sv" style="color:#a855f7">${enLocationClient}</div><div class="sl">Location client</div></div>
-    <div class="stat"><div class="sv" style="color:#f59e0b">${enLocationMaint}</div><div class="sl">Maintenance</div></div>
+    <div class="stat"><div class="sv">${total}</div><div class="sl">Vélos au total</div></div>
+    <div class="stat"><div class="sv">${enStation}</div><div class="sl">Vélos en station</div></div>
+    <div class="stat"><div class="sv" style="color:#a855f7">${enLocationClient}</div><div class="sl">Locations client</div></div>
+    <div class="stat"><div class="sv" style="color:#f59e0b">${enLocationMaint}</div><div class="sl">Locations Maintenance</div></div>
   </div>
   <div class="upd">${Object.keys(ZONES).length} stations</div>
   <div class="stations">`;
@@ -184,7 +184,7 @@
         </div>
         <div class="sr">
           <div><div class="cn" style="color:#a855f7">${clientRentals.length}</div><div class="cb">vélos</div></div>
-          <span class="badge purple">actifs</span>
+          <span class="badge purple">en cours</span>
           <svg id="chev-rental-client" class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
         </div>
       </div>
@@ -196,7 +196,7 @@
 
   if (maintenanceRentals.length > 0) {
     html += `
-    <div class="station" style="border-style:dashed;border-color:rgba(245,158,11,.3)">
+    <div class="station" style="border-style:dashed">
       <div class="sh" onclick="toggle('rental-maint')">
         <div class="sl2">
           <div class="ico" style="background:rgba(245,158,11,.12)">
@@ -204,7 +204,7 @@
               <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
             </svg>
           </div>
-          <div><div class="sn" style="color:#f59e0b">Maintenance</div><div class="sm">vélos en service</div></div>
+          <div><div class="sn" style="color:#f59e0b">Maintenance</div><div class="sm">trajets en cours</div></div>
         </div>
         <div class="sr">
           <div><div class="cn" style="color:#f59e0b">${maintenanceRentals.length}</div><div class="cb">vélos</div></div>
