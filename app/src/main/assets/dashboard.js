@@ -150,10 +150,9 @@
 
   function rentalRows(list, color) {
     return list.map(r => {
-      const coordMatch = r.station.match(/(-?\d+\.\d+)\s+(-?\d+\.\d+)/);
-      const stationLabel = coordMatch
-        ? `GPS ${parseFloat(coordMatch[1]).toFixed(4)}, ${parseFloat(coordMatch[2]).toFixed(4)}`
-        : r.station;
+      const stationClean = r.station.replace(/^(D\u00e9part|Depart)\s*/i, '').trim();
+      const coordMatch = stationClean.match(/^-?\d+\.\d+\s+-?\d+\.\d+$/);
+      const stationLabel = coordMatch ? 'Hors zone' : (stationClean || 'Inconnue');
       return `
       <div style="display:grid;grid-template-columns:65px 1fr 105px;gap:6px;margin-bottom:6px;align-items:center">
         <span class="pill" style="border-color:${color}">${r.id}</span>
@@ -166,7 +165,7 @@
     return `<div style="display:grid;grid-template-columns:65px 1fr 105px;gap:6px;margin-bottom:8px;margin-top:12px">
       <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-left:3px">Numéro</div>
       <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-left:3px">Départ</div>
-      <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-left:3px">Heure</div>
+      <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-left:3px">Date</div>
     </div>`;
   }
 
@@ -196,7 +195,7 @@
 
   if (maintenanceRentals.length > 0) {
     html += `
-    <div class="station" style="border-style:dashed">
+    <div class="station" style="border-style:dashed;">
       <div class="sh" onclick="toggle('rental-maint')">
         <div class="sl2">
           <div class="ico" style="background:rgba(245,158,11,.12)">
