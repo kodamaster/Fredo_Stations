@@ -184,7 +184,7 @@ public class MainActivity extends Activity {
             "        if(type === 'maintenance'){" +
             "          dateHeure = cells[2].innerText.trim();" +
             "          var cell3 = cells.length > 3 ? cells[3].innerText.trim() : '';" +
-            "          station = cell3 || 'Maintenance';" +
+            "          station = cell3.replace(/^(D\u00e9part|Depart)\\s*/i, '').trim() || 'Maintenance';" +
             "          if(dateHeure){" +
             "            var dp = dateHeure.split(' ');" +
             "            if(dp.length >= 2){" +
