@@ -74,8 +74,8 @@
 
   const css = `
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-    [data-theme="dark"]{--bg:#0d0f14;--fg:#f0f2f7;--card:#13161d;--card2:#1a1e28;--header:rgba(13,15,20,.97);--border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);--border3:rgba(255,255,255,.13);--muted:#6b7280;--bar:rgba(255,255,255,.1);--sborder:rgba(255,255,255,.07)}
-    [data-theme="light"]{--bg:#f1f5f9;--fg:#1e293b;--card:#ffffff;--card2:#e8edf3;--header:rgba(241,245,249,.97);--border:rgba(0,0,0,.08);--border2:rgba(0,0,0,.13);--border3:rgba(0,0,0,.13);--muted:#94a3b8;--bar:rgba(0,0,0,.08);--sborder:rgba(0,0,0,.08)}
+    [data-theme="dark"]{--bg:#0d0f14;--fg:#f0f2f7;--sv:#f0f2f7;--card:#13161d;--card2:#1a1e28;--header:rgba(13,15,20,.97);--border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);--border3:rgba(255,255,255,.13);--muted:#6b7280;--bar:rgba(255,255,255,.1);--sborder:rgba(255,255,255,.07)}
+    [data-theme="light"]{--bg:#f5f7fa;--fg:#1e293b;--sv:#5b9bd5;--card:#ffffff;--card2:#eef1f6;--header:rgba(255,255,255,.97);--border:rgba(0,0,0,.07);--border2:rgba(0,0,0,.1);--border3:rgba(0,0,0,.1);--muted:#9ca3af;--bar:rgba(0,0,0,.07);--sborder:rgba(0,0,0,.07)}
     body{background:var(--bg);color:var(--fg);font-family:-apple-system,sans-serif;min-height:100vh}
     .header{position:relative;top:0;background:var(--header);border-bottom:1px solid var(--border);padding:40px 16px 12px;display:flex;align-items:center;justify-content:space-between}
     .dot{width:8px;height:8px;border-radius:50%;background:#5b9bd5;box-shadow:0 0 8px #5b9bd5;animation:pulse 2s infinite;margin-right:10px;flex-shrink:0}
@@ -154,8 +154,8 @@
     </div>
   </div>
   <div class="stats" style="grid-template-columns:repeat(2,1fr)">
-    <div class="stat"><div class="sv">${total}</div><div class="sl">Vélos au total</div></div>
-    <div class="stat"><div class="sv">${enStation}</div><div class="sl">Vélos en station</div></div>
+    <div class="stat"><div class="sv" style="color:var(--sv)">${total}</div><div class="sl">Vélos au total</div></div>
+    <div class="stat"><div class="sv" style="color:var(--sv)">${enStation}</div><div class="sl">Vélos en station</div></div>
     <div class="stat"><div class="sv" style="color:#a855f7">${enLocationClient}</div><div class="sl">Locations client</div></div>
     <div class="stat"><div class="sv" style="color:#f59e0b">${enLocationMaint}</div><div class="sl">Locations Maintenance</div></div>
   </div>
