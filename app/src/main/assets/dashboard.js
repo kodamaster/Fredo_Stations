@@ -62,6 +62,7 @@
   const enLocationMaint = maintenanceRentals.length;
   const now = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
   const rows = Object.entries(ZONES)
+    .filter(([id]) => ZONE_NAMES[id])
     .map(([id,z]) => ({id, nom:z.nom, places:z.places, ordre:z.ordre, bikes:counts[id]}))
     .sort((a,b) => a.ordre - b.ordre);
 
