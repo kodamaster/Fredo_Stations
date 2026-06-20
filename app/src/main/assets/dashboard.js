@@ -5,7 +5,11 @@
   const activeRentals = (__DATA__.r || []).filter(r => r.id && /^\d{4,6}$/.test(r.id));
   const activeRentalIds = activeRentals.map(r => r.id);
   const clientRentals = activeRentals.filter(r => r.type !== 'maintenance');
-  const maintenanceRentals = activeRentals.filter(r => r.type === 'maintenance' && !r.station.match(/^-?\d+\.\d+\s+-?\d+\.\d+$/));
+  const maintenanceRentals = activeRentals.filter(r => {
+    if (r.type !== 'maintenance') return false;
+      const sc = r.station.replace(/^(Départ|Depart)\s*/i, '').trim();
+      return !sc.match(/^-?\d+\.\d+\s+-?\d+\.\d+$/);
+  });
   const RADIUS = 50;
 
   const ZONE_NAMES = {
