@@ -60,7 +60,7 @@
   });
 
   const enStation = Object.values(counts).reduce((s,v) => s+v.length, 0);
-  const enLocation = activeRentals.length;
+  const enLocation = clientRentals.length + maintenanceRentals.length;
   const total = enStation + enLocation;
   const enLocationClient = clientRentals.length;
   const enLocationMaint = maintenanceRentals.length;
