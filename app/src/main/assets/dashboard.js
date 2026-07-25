@@ -11,7 +11,6 @@
       return !sc.match(/^-?\d+\.\d+\s+-?\d+\.\d+$/);
   });
   const RADIUS = 50;
-
   const ZONE_NAMES = {
     "2888": {nom: "Nation",              places: 6,  ordre: 16},
     "2889": {nom: "Théâtre",             places: 9,  ordre: 22},
