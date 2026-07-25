@@ -13,12 +13,27 @@
   const RADIUS = 50;
 
   const ZONE_NAMES = {
-    "2888": {nom: "Nation",          places: 6,  ordre: 3},
-    "2889": {nom: "Théâtre",         places: 9,  ordre: 5},
-    "2890": {nom: "Place d'Armes",   places: 6,  ordre: 4},
-    "2891": {nom: "Université",      places: 9,  ordre: 6},
-    "2893": {nom: "Milieu de Digue", places: 6,  ordre: 2},
-    "2905": {nom: "Gare",            places: 9,  ordre: 1}
+    "2888": {nom: "Nation",              places: 6,  ordre: 16},
+    "2889": {nom: "Théâtre",             places: 9,  ordre: 22},
+    "2890": {nom: "Place d'armes",       places: 6,  ordre: 18},
+    "2891": {nom: "Université",          places: 9,  ordre: 23},
+    "2937": {nom: "Pluviose",            places: 6,  ordre: 19},
+    "2938": {nom: "Camping de Blériot",  places: 6,  ordre: 3},
+    "2939": {nom: "Église de Blériot",   places: 6,  ordre: 9},
+    "2940": {nom: "Matelote",            places: 3,  ordre: 13},
+    "2941": {nom: "Camping de Calais",   places: 3,  ordre: 4},
+    "2942": {nom: "Base de voile",       places: 3,  ordre: 2},
+    "2943": {nom: "Richelieu",           places: 6,  ordre: 21},
+    "2944": {nom: "Diderot",             places: 3,  ordre: 8},
+    "2945": {nom: "Pôle administratif",  places: 3,  ordre: 20},
+    "2946": {nom: "Cité de la dentelle", places: 3,  ordre: 5},
+    "2947": {nom: "Médiathèque",         places: 3,  ordre: 14},
+    "2948": {nom: "Condorcet",           places: 3,  ordre: 6},
+    "2949": {nom: "Hôtel de ville",      places: 6,  ordre: 11},
+    "2950": {nom: "Coubertin",           places: 6,  ordre: 7},
+    "2951": {nom: "Piscine Icéo",        places: 6,  ordre: 17},
+    "2952": {nom: "Léonard De Vinci",    places: 3,  ordre: 12},
+    "2905": {nom: "Gare SNCF",           places: 9,  ordre: 10}
   };
 
   function centroid(path) {
