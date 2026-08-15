@@ -32,8 +32,8 @@
     "2950": {nom: "Coubertin",           places: 6,  ordre: 6},
     "2951": {nom: "Piscine Icéo",        places: 6,  ordre: 20},
     "2952": {nom: "Léonard De Vinci",    places: 6,  ordre: 13},
-    "2952": {nom: "Gare des Fontinettes",    places: 3,  ordre: 9},
-    "2952": {nom: "Joffre",    places: 3,  ordre: 12},
+    "2997": {nom: "Gare des Fontinettes",    places: 3,  ordre: 9},
+    "2998": {nom: "Joffre",    places: 3,  ordre: 12},
     "2905": {nom: "Gare SNCF",           places: 9,  ordre: 10}
   };
 
