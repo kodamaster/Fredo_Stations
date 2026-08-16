@@ -166,8 +166,9 @@
     .rbtn{width:38px;height:38px;border-radius:50%;background:${th.toggleBg};border:1px solid ${th.toggleBorder};display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;box-shadow:${th.shadow}}
     .tbtn{width:38px;height:38px;border-radius:50%;background:${th.toggleBg};border:1px solid ${th.toggleBorder};display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:17px;margin-right:6px;box-shadow:${th.shadow}}
     .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:12px}
-    .stat{background:${th.surface};border:1px solid ${th.border};border-radius:12px;padding:12px;position:relative;overflow:hidden;box-shadow:${th.shadow}}
+    .stat{background:${th.surface};border:1px solid ${th.border};border-radius:12px;padding:12px;position:relative;overflow:hidden;box-shadow:${th.shadow};display:flex;align-items:center;gap:10px}
     .stat::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:${th.statTop}}
+    .stat-ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
     .sv{font-size:26px;font-weight:800;letter-spacing:-1px;line-height:1}
     .sl{font-size:10px;color:${th.muted};margin-top:3px;text-transform:uppercase}
     .upd{text-align:center;font-size:11px;color:${th.muted};padding:4px 12px 8px}
@@ -261,10 +262,25 @@
     </div>
   </div>
   <div class="stats">
-    <div class="stat"><div class="sv">${total}</div><div class="sl">Vélos au total</div></div>
-    <div class="stat"><div class="sv">${enStation}</div><div class="sl">Vélos en station</div></div>
-    <div class="stat"><div class="sv" style="color:${th.purple}">${enLocationClient}</div><div class="sl">Locations client</div></div>
-    <div class="stat"><div class="sv" style="color:${th.amber}">${enLocationMaint}</div><div class="sl">Locations Maintenance</div></div>
+    <div class="stat">
+      <div class="stat-ico" style="background:${th.greenDim}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${th.green}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/>
+          <path d="M15 6a1 1 0 100-2 1 1 0 000 2z"/>
+          <path d="M12 17.5V14l-3-3 4-3 2 3h3"/>
+        </svg>
+      </div>
+      <div><div class="sv">${total}</div><div class="sl">Vélos</div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-ico" style="background:${th.accentDim}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${th.accent}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 21s-7-6.1-7-11.5A7 7 0 0119 9.5C19 14.9 12 21 12 21z"/>
+          <circle cx="12" cy="9.5" r="2.5"/>
+        </svg>
+      </div>
+      <div><div class="sv">${rows.length}</div><div class="sl">Stations</div></div>
+    </div>
   </div>
   <div class="upd">${rows.length} stations</div>
   <div class="stations">`;
@@ -279,7 +295,7 @@
               <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
             </svg>
           </div>
-          <div><div class="sn" style="color:${th.purple}">Locations client</div><div class="sm">trajets en cours</div></div>
+          <div><div class="sn" style="color:${th.purple}">Locations clients</div><div class="sm">en cours</div></div>
         </div>
         <div class="sr">
           <div><div class="cn" style="color:${th.purple}">${clientRentals.length}</div><div class="cb">vélos</div></div>
@@ -303,7 +319,7 @@
               <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
             </svg>
           </div>
-          <div><div class="sn" style="color:${th.amber}">Maintenance</div><div class="sm">trajets en cours</div></div>
+          <div><div class="sn" style="color:${th.amber}">Régulation</div><div class="sm">en cours</div></div>
         </div>
         <div class="sr">
           <div><div class="cn" style="color:${th.amber}">${maintenanceRentals.length}</div><div class="cb">vélos</div></div>
