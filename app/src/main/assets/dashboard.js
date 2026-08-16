@@ -250,7 +250,6 @@
 
     let html = `<style>${buildCSS(th)}</style>
   <div class="header">
-    <div class="dot"></div>
     <div class="title">Fredo Stations</div>
     <div style="font-size:11px;color:${th.muted};margin-right:8px">Mise à jour à ${now}</div>
     <div class="tbtn" onclick="switchTheme()" title="Changer de thème">${th.toggleIcon}</div>
@@ -263,8 +262,8 @@
   </div>
   <div class="stats">
     <div class="stat">
-      <div class="stat-ico" style="background:${th.greenDim}">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${th.green}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <div class="stat-ico" style="background:${th.accentDim}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${th.accent}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/>
           <path d="M15 6a1 1 0 100-2 1 1 0 000 2z"/>
           <path d="M12 17.5V14l-3-3 4-3 2 3h3"/>
@@ -282,12 +281,11 @@
       <div><div class="sv">${rows.length}</div><div class="sl">Stations</div></div>
     </div>
   </div>
-  <div class="upd">${rows.length} stations</div>
   <div class="stations">`;
 
     if (clientRentals.length > 0) {
       html += `
-    <div class="station" style="border-style:dashed">
+    <div class="station" style="border-style:solid">
       <div class="sh" onclick="toggle('rental-client')">
         <div class="sl2">
           <div class="ico" style="background:${th.purpleDim}">
@@ -311,12 +309,16 @@
 
     if (maintenanceRentals.length > 0) {
       html += `
-    <div class="station" style="border-style:dashed">
+    <div class="station" style="border-style:solid">
       <div class="sh" onclick="toggle('rental-maint')">
         <div class="sl2">
           <div class="ico" style="background:${th.amberDim}">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${th.amber}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+              <path d="M3 17V7a1 1 0 0 1 1-1h9v11"/>
+              <path d="M13 10h4l4 3.5V17h-2"/>
+              <path d="M3 17h2"/>
+              <circle cx="7.5" cy="17.5" r="2"/>
+              <circle cx="17.5" cy="17.5" r="2"/>
             </svg>
           </div>
           <div><div class="sn" style="color:${th.amber}">Régulation</div><div class="sm">en cours</div></div>
@@ -353,8 +355,8 @@
         <div class="sl2">
           <div class="ico">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${th.accent}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/>
-              <circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h3.5"/>
+              <path d="M12 21s-7-6.1-7-11.5A7 7 0 0119 9.5C19 14.9 12 21 12 21z"/>
+              <circle cx="12" cy="9.5" r="2.5"/>
             </svg>
           </div>
           <div><div class="sn">${r.nom}</div><div class="sm">${r.places} places</div></div>
