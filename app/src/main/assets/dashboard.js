@@ -76,7 +76,9 @@
     if (bestId) counts[bestId].push(...filteredIds);
   });
 
-  const enStation = Object.values(counts).reduce((s,v) => s+v.length, 0);
+  const enStation = Object.entries(counts)
+    .filter(([id]) => ZONE_NAMES[id])
+    .reduce((s,[,v]) => s+v.length, 0);
   const enLocation = clientRentals.length + maintenanceRentals.length;
   const total = enStation + enLocation;
   const enLocationClient = clientRentals.length;
@@ -264,7 +266,7 @@
     <div class="stat"><div class="sv" style="color:${th.purple}">${enLocationClient}</div><div class="sl">Locations client</div></div>
     <div class="stat"><div class="sv" style="color:${th.amber}">${enLocationMaint}</div><div class="sl">Locations Maintenance</div></div>
   </div>
-  <div class="upd">${Object.keys(ZONES).length} stations</div>
+  <div class="upd">${rows.length} stations</div>
   <div class="stations">`;
 
     if (clientRentals.length > 0) {
