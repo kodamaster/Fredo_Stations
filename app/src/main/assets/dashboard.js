@@ -293,7 +293,7 @@
               <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
             </svg>
           </div>
-          <div><div class="sn" style="color:${th.purple}">Locations clients</div><div class="sm">actif</div></div>
+          <div><div class="sn" style="color:${th.purple}">Locations clients</div><div class="sm">en cours</div></div>
         </div>
         <div class="sr">
           <div><div class="cn" style="color:${th.purple}">${clientRentals.length}</div><div class="cb">vélos</div></div>
@@ -314,18 +314,20 @@
         <div class="sl2">
           <div class="ico" style="background:${th.amberDim}">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${th.amber}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 17V7a1 1 0 0 1 1-1h9v11"/>
-              <path d="M13 10h4l4 3.5V17h-2"/>
-              <path d="M3 17h2"/>
-              <circle cx="7.5" cy="17.5" r="2"/>
-              <circle cx="17.5" cy="17.5" r="2"/>
+              <path d="M2.5 15V11.5h8V15"/>
+              <path d="M10.5 15V6.5h4l4 4V15"/>
+              <path d="M2.5 15h1"/>
+              <path d="M20.5 15h1"/>
+              <path d="M12.5 15h4"/>
+              <circle cx="6.5" cy="17.5" r="2"/>
+              <circle cx="17" cy="17.5" r="2"/>
             </svg>
           </div>
           <div><div class="sn" style="color:${th.amber}">Régulation</div><div class="sm">en cours</div></div>
         </div>
         <div class="sr">
           <div><div class="cn" style="color:${th.amber}">${maintenanceRentals.length}</div><div class="cb">vélos</div></div>
-          <span class="badge low">en cours</span>
+          <span class="badge low">actif</span>
           <svg id="chev-rental-maint" class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
         </div>
       </div>
