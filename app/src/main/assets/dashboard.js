@@ -293,11 +293,11 @@
               <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
             </svg>
           </div>
-          <div><div class="sn" style="color:${th.purple}">Locations clients</div><div class="sm">en cours</div></div>
+          <div><div class="sn" style="color:${th.purple}">Locations clients</div><div class="sm">actif</div></div>
         </div>
         <div class="sr">
           <div><div class="cn" style="color:${th.purple}">${clientRentals.length}</div><div class="cb">vélos</div></div>
-          <span class="badge purple">en cours</span>
+          <span class="badge purple">actif</span>
           <svg id="chev-rental-client" class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
         </div>
       </div>
@@ -309,7 +309,7 @@
 
     if (maintenanceRentals.length > 0) {
       html += `
-    <div class="station" style="border-style:solid">
+    <div class="station" style="border-style:solid;margin-bottom:12px">
       <div class="sh" onclick="toggle('rental-maint')">
         <div class="sl2">
           <div class="ico" style="background:${th.amberDim}">
