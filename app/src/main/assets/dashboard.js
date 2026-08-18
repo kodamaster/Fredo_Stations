@@ -12,29 +12,30 @@
   });
   const RADIUS = 50;
   const ZONE_NAMES = {
-    "2888": {nom: "Nation",              places: 6,  ordre: 17},
-    "2889": {nom: "Théâtre",             places: 9,  ordre: 23},
-    "2890": {nom: "Place d'armes",       places: 6,  ordre: 18},
-    "2891": {nom: "Université",          places: 9,  ordre: 24},
+    "2888": {nom: "Nation",              places: 6,  ordre: 18},
+    "2889": {nom: "Théâtre",             places: 9,  ordre: 24},
+    "2890": {nom: "Place d'armes",       places: 6,  ordre: 19},
+    "2891": {nom: "Université",          places: 9,  ordre: 25},
     "2893": {nom: "Milieu de digue",     places: 6,  ordre: 16},
-    "2937": {nom: "Pluviose",            places: 6,  ordre: 19},
+    "2937": {nom: "Pluviose",            places: 6,  ordre: 20},
     "2938": {nom: "Camping de Blériot",  places: 6,  ordre: 2},
     "2939": {nom: "Église de Blériot",   places: 6,  ordre: 8},
-    "2940": {nom: "Matelote",            places: 3,  ordre: 14},
+    "2940": {nom: "Matelote",            places: 3,  ordre: 15},
     "2941": {nom: "Camping de Calais",   places: 3,  ordre: 3},
     "2942": {nom: "Base de voile",       places: 6,  ordre: 1},
-    "2943": {nom: "Richelieu",           places: 6,  ordre: 22},
+    "2943": {nom: "Richelieu",           places: 6,  ordre: 23},
     "2944": {nom: "Diderot",             places: 3,  ordre: 7},
-    "2945": {nom: "Pôle administratif",  places: 3,  ordre: 20},
+    "2945": {nom: "Pôle administratif",  places: 3,  ordre: 21},
     "2946": {nom: "Cité de la dentelle", places: 3,  ordre: 4},
-    "2947": {nom: "Médiathèque",         places: 3,  ordre: 15},
+    "2947": {nom: "Médiathèque",         places: 3,  ordre: 16},
     "2948": {nom: "Condorcet",           places: 6,  ordre: 5},
     "2949": {nom: "Hôtel de ville",      places: 6,  ordre: 12},
     "2950": {nom: "Coubertin",           places: 6,  ordre: 6},
-    "2951": {nom: "Piscine Icéo",        places: 6,  ordre: 21},
+    "2951": {nom: "Piscine Icéo",        places: 6,  ordre: 22},
     "2952": {nom: "Léonard De Vinci",    places: 6,  ordre: 13},
-    "2997": {nom: "Gare des Fontinettes",    places: 3,  ordre: 9},
-    "2998": {nom: "Joffre",    places: 3,  ordre: 12},
+    "2997": {nom: "Gare des Fontinettes",places: 3,  ordre: 9},
+    "2998": {nom: "Joffre",              places: 3,  ordre: 12},
+    "2940": {nom: "Marck - Schweitzer",  places: 3,  ordre: 14},
     "2905": {nom: "Gare SNCF",           places: 9,  ordre: 10}
   };
 
@@ -297,7 +298,7 @@
         </div>
         <div class="sr">
           <div><div class="cn" style="color:${th.purple}">${clientRentals.length}</div><div class="cb">vélos</div></div>
-          <span class="badge purple">actif</span>
+          <span class="badge purple">actif&nbsp</span>
           <svg id="chev-rental-client" class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
         </div>
       </div>
@@ -327,7 +328,7 @@
         </div>
         <div class="sr">
           <div><div class="cn" style="color:${th.amber}">${maintenanceRentals.length}</div><div class="cb">vélos</div></div>
-          <span class="badge low">actif</span>
+          <span class="badge low">actif&nbsp</span>
           <svg id="chev-rental-maint" class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
         </div>
       </div>
@@ -341,7 +342,7 @@
       const pct = r.places > 0 ? Math.round(r.bikes.length / r.places * 100) : 0;
       const bc = pct === 0 ? th.red : pct >= 100 ? th.red : pct <= 30 ? th.amber : th.green;
       const badge = r.bikes.length === 0
-        ? `<span class="badge empty">vide &nbsp</span>`
+        ? `<span class="badge empty">vide&nbsp</span>`
         : r.bikes.length <= r.places * .3
         ? `<span class="badge low">faible</span>`
         : r.bikes.length >= r.places
