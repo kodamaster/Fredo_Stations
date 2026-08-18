@@ -35,7 +35,7 @@
     "2952": {nom: "Léonard De Vinci",    places: 6,  ordre: 13},
     "2997": {nom: "Gare des Fontinettes",places: 3,  ordre: 9},
     "2998": {nom: "Joffre",              places: 3,  ordre: 12},
-    "2940": {nom: "Marck - Schweitzer",  places: 3,  ordre: 14},
+    "3004": {nom: "Marck - Schweitzer",  places: 3,  ordre: 14},
     "2905": {nom: "Gare SNCF",           places: 9,  ordre: 10}
   };
 
@@ -347,7 +347,7 @@
         ? `<span class="badge low">faible</span>`
         : r.bikes.length >= r.places
         ? `<span class="badge empty">pleine</span>`
-        : `<span class="badge ok">dispo</span>`;
+        : `<span class="badge ok">bien&nbsp</span>`;
       const pills = r.bikes.length > 0
         ? r.bikes.map(b => `<span class="pill">${b}</span>`).join('')
         : `<span style="color:${th.muted};font-size:13px">Aucun vélo</span>`;
