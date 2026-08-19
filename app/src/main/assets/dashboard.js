@@ -174,8 +174,6 @@
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
     body{background:${th.bg};color:${th.text};font-family:-apple-system,sans-serif;min-height:100vh;transition:background .25s,color .25s}
     .header{position:relative;top:0;background:${th.headerBg};border-bottom:1px solid ${th.border};padding:40px 16px 12px;display:flex;align-items:center;justify-content:space-between}
-    .dot{width:8px;height:8px;border-radius:50%;background:${th.accent};box-shadow:0 0 8px ${th.accent};animation:pulse 2s infinite;margin-right:10px;flex-shrink:0}
-    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
     .title{font-size:17px;font-weight:700;flex:1;color:${th.text}}.title span{color:${th.accent}}
     .rbtn{width:38px;height:38px;border-radius:50%;background:${th.toggleBg};border:1px solid ${th.toggleBorder};display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;box-shadow:${th.shadow}}
     .tbtn{width:38px;height:38px;border-radius:50%;background:${th.toggleBg};border:1px solid ${th.toggleBorder};display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:17px;margin-right:6px;box-shadow:${th.shadow}}
@@ -312,14 +310,14 @@
     </div>
   </div>
   <div class="sortbar">
-    <div class="sortbtn ${currentSort==='alpha'?'active':''}" onclick="setSort('alpha')">A → Z</div>
+    <div class="sortbtn ${currentSort==='alpha'?'active':''}" onclick="setSort('alpha')">A - Z</div>
     <div class="sortbtn ${currentSort==='numero'?'active':''}" onclick="setSort('numero')">N° station</div>
-    <div class="sortbtn ${currentSort==='fillDesc'?'active':''}" onclick="setSort('fillDesc')">Vélos ↓</div>
-    <div class="sortbtn ${currentSort==='fillAsc'?'active':''}" onclick="setSort('fillAsc')">Vélos ↑</div>
+    <div class="sortbtn ${currentSort==='fillDesc'?'active':''}" onclick="setSort('fillDesc')">Vélos ↑</div>
+    <div class="sortbtn ${currentSort==='fillAsc'?'active':''}" onclick="setSort('fillAsc')">Vélos ↓</div>
   </div>
   <div class="stations">`;
 
-    if (clientRentals.length > 0) {
+    {
       html += `
     <div class="station" style="border-style:solid">
       <div class="sh" onclick="toggle('rental-client')">
@@ -338,12 +336,12 @@
         </div>
       </div>
       <div class="sbody" id="body-rental-client">
-        ${rentalHeader()}${rentalRows(clientRentals, th.purple)}
+        ${clientRentals.length > 0 ? rentalHeader()+rentalRows(clientRentals, th.purple) : `<div style="padding:12px 0;color:${th.muted};font-size:13px">Aucune location en cours</div>`}
       </div>
     </div>`;
     }
 
-    if (maintenanceRentals.length > 0) {
+    {
       html += `
     <div class="station" style="border-style:solid;margin-bottom:12px">
       <div class="sh" onclick="toggle('rental-maint')">
@@ -368,7 +366,7 @@
         </div>
       </div>
       <div class="sbody" id="body-rental-maint">
-        ${rentalHeader()}${rentalRows(maintenanceRentals, th.amber)}
+        ${maintenanceRentals.length > 0 ? rentalHeader()+rentalRows(maintenanceRentals, th.amber) : `<div style="padding:12px 0;color:${th.muted};font-size:13px">Aucune location en cours</div>`}
       </div>
     </div>`;
     }
