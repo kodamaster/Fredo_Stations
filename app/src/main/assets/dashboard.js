@@ -12,31 +12,31 @@
   });
   const RADIUS = 50;
   const ZONE_NAMES = {
-    "2888": {nom: "Nation",              places: 6,  ordre: 18},
-    "2889": {nom: "Théâtre",             places: 9,  ordre: 24},
-    "2890": {nom: "Place d'armes",       places: 6,  ordre: 19},
-    "2891": {nom: "Université",          places: 9,  ordre: 25},
-    "2893": {nom: "Milieu de digue",     places: 6,  ordre: 16},
-    "2937": {nom: "Pluviose",            places: 6,  ordre: 20},
-    "2938": {nom: "Camping de Blériot",  places: 6,  ordre: 2},
-    "2939": {nom: "Église de Blériot",   places: 6,  ordre: 8},
-    "2940": {nom: "Matelote",            places: 3,  ordre: 15},
-    "2941": {nom: "Camping de Calais",   places: 3,  ordre: 3},
-    "2942": {nom: "Base de voile",       places: 6,  ordre: 1},
-    "2943": {nom: "Richelieu",           places: 6,  ordre: 23},
-    "2944": {nom: "Diderot",             places: 3,  ordre: 7},
-    "2945": {nom: "Pôle administratif",  places: 3,  ordre: 21},
-    "2946": {nom: "Cité de la dentelle", places: 3,  ordre: 4},
-    "2947": {nom: "Médiathèque",         places: 3,  ordre: 16},
-    "2948": {nom: "Condorcet",           places: 6,  ordre: 5},
-    "2949": {nom: "Hôtel de ville",      places: 6,  ordre: 12},
-    "2950": {nom: "Coubertin",           places: 6,  ordre: 6},
-    "2951": {nom: "Piscine Icéo",        places: 6,  ordre: 22},
-    "2952": {nom: "Léonard De Vinci",    places: 6,  ordre: 13},
-    "2997": {nom: "Gare des Fontinettes",places: 3,  ordre: 9},
-    "2998": {nom: "Joffre",              places: 3,  ordre: 12},
-    "3004": {nom: "Marck - Schweitzer",  places: 3,  ordre: 14},
-    "2905": {nom: "Gare SNCF",           places: 9,  ordre: 10}
+    "2888": {nom: "Nation",              places: 6,  numero: 24},
+    "2889": {nom: "Théâtre",             places: 9,  numero: 02},
+    "2890": {nom: "Place d'armes",       places: 6,  numero: 06},
+    "2891": {nom: "Université",          places: 9,  numero: 15},
+    "2893": {nom: "Milieu de digue",     places: 6,  numero: 08},
+    "2937": {nom: "Pluviose",            places: 6,  numero: 07},
+    "2938": {nom: "Camping de Blériot",  places: 6,  numero: 10},
+    "2939": {nom: "Église de Blériot",   places: 6,  numero: 09},
+    "2940": {nom: "Matelote",            places: 3,  numero: 19},
+    "2941": {nom: "Camping de Calais",   places: 3,  numero: 40},
+    "2942": {nom: "Base de voile",       places: 6,  numero: 11},
+    "2943": {nom: "Richelieu",           places: 6,  numero: 05},
+    "2944": {nom: "Diderot",             places: 3,  numero: 22},
+    "2945": {nom: "Pôle administratif",  places: 3,  numero: 13},
+    "2946": {nom: "Cité de la dentelle", places: 3,  numero: 14},
+    "2947": {nom: "Médiathèque",         places: 3,  numero: 66},
+    "2948": {nom: "Condorcet",           places: 6,  numero: 23},
+    "2949": {nom: "Hôtel de ville",      places: 6,  numero: 03},
+    "2950": {nom: "Coubertin",           places: 6,  numero: 21},
+    "2951": {nom: "Piscine Icéo",        places: 6,  numero: 18},
+    "2952": {nom: "Léonard De Vinci",    places: 6,  numero: 46},
+    "2997": {nom: "Gare des Fontinettes",places: 3,  numero: 39},
+    "2998": {nom: "Joffre",              places: 3,  numero: 26},
+    "3004": {nom: "Marck - Schweitzer",  places: 3,  numero: 34},
+    "2905": {nom: "Gare SNCF",           places: 9,  numero: 04}
   };
 
   function centroid(path) {
@@ -53,11 +53,11 @@
 
   const ZONES = {};
   Object.entries(zonesRaw).forEach(([id, z]) => {
-    const info = ZONE_NAMES[id] || {nom: 'Zone '+id, places: 0, ordre: 99};
+    const info = ZONE_NAMES[id] || {nom: 'Zone '+id, places: 0, numero: 99};
     ZONES[id] = {
       nom: info.nom,
       places: info.places,
-      ordre: info.ordre || 99,
+      numero: info.numero || 99,
       centroid: centroid(z.path)
     };
   });
@@ -85,10 +85,23 @@
   const enLocationClient = clientRentals.length;
   const enLocationMaint = maintenanceRentals.length;
   const now = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
-  const rows = Object.entries(ZONES)
+  const baseRows = Object.entries(ZONES)
     .filter(([id]) => ZONE_NAMES[id])
-    .map(([id,z]) => ({id, nom:z.nom, places:z.places, ordre:z.ordre, bikes:counts[id]}))
-    .sort((a,b) => a.ordre - b.ordre);
+    .map(([id,z]) => ({id, nom:z.nom, places:z.places, numero:z.numero, bikes:counts[id]}));
+
+  function sortRows(mode) {
+    const arr = baseRows.slice();
+    if (mode === 'numero') {
+      arr.sort((a,b) => a.numero - b.numero);
+    } else if (mode === 'fillDesc') {
+      arr.sort((a,b) => b.bikes.length - a.bikes.length);
+    } else if (mode === 'fillAsc') {
+      arr.sort((a,b) => a.bikes.length - b.bikes.length);
+    } else {
+      arr.sort((a,b) => a.nom.localeCompare(b.nom, 'fr', {sensitivity:'base'}));
+    }
+    return arr;
+  }
 
   // ── THÈMES ──────────────────────────────────────────────────────────────────
   const THEMES = {
@@ -167,6 +180,10 @@
     .rbtn{width:38px;height:38px;border-radius:50%;background:${th.toggleBg};border:1px solid ${th.toggleBorder};display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;box-shadow:${th.shadow}}
     .tbtn{width:38px;height:38px;border-radius:50%;background:${th.toggleBg};border:1px solid ${th.toggleBorder};display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:17px;margin-right:6px;box-shadow:${th.shadow}}
     .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:12px}
+    .sortbar{display:flex;gap:6px;padding:0 12px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .sortbar::-webkit-scrollbar{display:none}
+    .sortbtn{padding:7px 13px;border-radius:99px;font-size:12px;font-weight:600;border:1px solid ${th.border};background:${th.surface};color:${th.muted};white-space:nowrap;cursor:pointer;flex-shrink:0}
+    .sortbtn.active{background:${th.accentDim};color:${th.accent};border-color:${th.accent}}
     .stat{background:${th.surface};border:1px solid ${th.border};border-radius:12px;padding:12px;position:relative;overflow:hidden;box-shadow:${th.shadow};display:flex;align-items:center;gap:10px}
     .stat::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:${th.statTop}}
     .stat-ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -184,12 +201,12 @@
     .sr{display:flex;align-items:center;gap:10px;flex-shrink:0;margin-left:8px}
     .cn{font-size:22px;font-weight:800;letter-spacing:-.5px;line-height:1;color:${th.text}}
     .cb{font-size:9px;color:${th.muted};text-transform:uppercase}
-    .badge{padding:4px 9px;border-radius:99px;font-size:11px;font-weight:600}
-    .ok{background:${th.greenDim};color:${th.green}}
-    .low{background:${th.amberDim};color:${th.amber}}
-    .empty{background:${th.redDim};color:${th.red}}
-    .blue{background:${th.accentDim};color:${th.accent}}
-    .purple{background:${th.purpleDim};color:${th.purple}}
+    .dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex-shrink:0}
+    .ok{background:${th.green}}
+    .low{background:${th.amber}}
+    .empty{background:${th.red}}
+    .blue{background:${th.accent}}
+    .purple{background:${th.purple}}
     .chev{color:${th.muted};transition:transform .25s;flex-shrink:0}
     .sbody{display:none;padding:0 14px 14px;border-top:1px solid ${th.border}}
     .sbody.open{display:block}
@@ -215,6 +232,17 @@
   window.reload = () => {
     if(typeof Android !== 'undefined') Android.showLoading();
     window.location.reload();
+  };
+
+  let currentSort = (typeof Android !== 'undefined' && Android.getSort)
+    ? (Android.getSort() || 'alpha')
+    : (localStorage.getItem('velin_sort') || 'alpha');
+
+  window.setSort = (mode) => {
+    currentSort = mode;
+    try { localStorage.setItem('velin_sort', currentSort); } catch(e){}
+    if(typeof Android !== 'undefined' && Android.setSort) Android.setSort(currentSort);
+    renderPage();
   };
 
   window.switchTheme = () => {
@@ -248,6 +276,7 @@
 
   function renderPage() {
     const th = t();
+    const rows = sortRows(currentSort);
 
     let html = `<style>${buildCSS(th)}</style>
   <div class="header">
@@ -282,6 +311,12 @@
       <div><div class="sv">${rows.length}</div><div class="sl">Stations</div></div>
     </div>
   </div>
+  <div class="sortbar">
+    <div class="sortbtn ${currentSort==='alpha'?'active':''}" onclick="setSort('alpha')">A → Z</div>
+    <div class="sortbtn ${currentSort==='numero'?'active':''}" onclick="setSort('numero')">N° station</div>
+    <div class="sortbtn ${currentSort==='fillDesc'?'active':''}" onclick="setSort('fillDesc')">Vélos ↓</div>
+    <div class="sortbtn ${currentSort==='fillAsc'?'active':''}" onclick="setSort('fillAsc')">Vélos ↑</div>
+  </div>
   <div class="stations">`;
 
     if (clientRentals.length > 0) {
@@ -298,7 +333,7 @@
         </div>
         <div class="sr">
           <div><div class="cn" style="color:${th.purple}">${clientRentals.length}</div><div class="cb">vélos</div></div>
-          <span class="badge purple">actif&nbsp</span>
+          <span class="dot purple"></span>
           <svg id="chev-rental-client" class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
         </div>
       </div>
@@ -328,7 +363,7 @@
         </div>
         <div class="sr">
           <div><div class="cn" style="color:${th.amber}">${maintenanceRentals.length}</div><div class="cb">vélos</div></div>
-          <span class="badge low">actif&nbsp</span>
+          <span class="dot low"></span>
           <svg id="chev-rental-maint" class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
         </div>
       </div>
@@ -342,12 +377,12 @@
       const pct = r.places > 0 ? Math.round(r.bikes.length / r.places * 100) : 0;
       const bc = pct === 0 ? th.red : pct >= 100 ? th.red : pct <= 30 ? th.amber : th.green;
       const badge = r.bikes.length === 0
-        ? `<span class="badge empty">vide&nbsp</span>`
+        ? `<span class="dot empty"></span>`
         : r.bikes.length <= r.places * .3
-        ? `<span class="badge low">faible</span>`
+        ? `<span class="dot low"></span>`
         : r.bikes.length >= r.places
-        ? `<span class="badge empty">pleine</span>`
-        : `<span class="badge ok">bien&nbsp</span>`;
+        ? `<span class="dot empty"></span>`
+        : `<span class="dot ok"></span>`;
       const pills = r.bikes.length > 0
         ? r.bikes.map(b => `<span class="pill">${b}</span>`).join('')
         : `<span style="color:${th.muted};font-size:13px">Aucun vélo</span>`;
