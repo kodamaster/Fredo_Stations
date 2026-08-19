@@ -178,7 +178,7 @@
     .rbtn{width:38px;height:38px;border-radius:50%;background:${th.toggleBg};border:1px solid ${th.toggleBorder};display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;box-shadow:${th.shadow}}
     .tbtn{width:38px;height:38px;border-radius:50%;background:${th.toggleBg};border:1px solid ${th.toggleBorder};display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:17px;margin-right:6px;box-shadow:${th.shadow}}
     .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:12px}
-    .sortbar{display:flex;gap:6px;padding:0 12px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .sortbar{display:flex;gap:6px;padding:4px 12px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
     .sortbar::-webkit-scrollbar{display:none}
     .sortbtn{padding:7px 13px;border-radius:99px;font-size:12px;font-weight:600;border:1px solid ${th.border};background:${th.surface};color:${th.muted};white-space:nowrap;cursor:pointer;flex-shrink:0}
     .sortbtn.active{background:${th.accentDim};color:${th.accent};border-color:${th.accent}}
@@ -309,12 +309,6 @@
       <div><div class="sv">${rows.length}</div><div class="sl">Stations</div></div>
     </div>
   </div>
-  <div class="sortbar">
-    <div class="sortbtn ${currentSort==='alpha'?'active':''}" onclick="setSort('alpha')">A - Z</div>
-    <div class="sortbtn ${currentSort==='numero'?'active':''}" onclick="setSort('numero')">N° station</div>
-    <div class="sortbtn ${currentSort==='fillDesc'?'active':''}" onclick="setSort('fillDesc')">Vélos ↑</div>
-    <div class="sortbtn ${currentSort==='fillAsc'?'active':''}" onclick="setSort('fillAsc')">Vélos ↓</div>
-  </div>
   <div class="stations">`;
 
     {
@@ -370,6 +364,14 @@
       </div>
     </div>`;
     }
+
+    html += `
+  <div class="sortbar">
+    <div class="sortbtn ${currentSort==='alpha'?'active':''}" onclick="setSort('alpha')">A - Z</div>
+    <div class="sortbtn ${currentSort==='numero'?'active':''}" onclick="setSort('numero')">N° station</div>
+    <div class="sortbtn ${currentSort==='fillDesc'?'active':''}" onclick="setSort('fillDesc')">Vélos ↑</div>
+    <div class="sortbtn ${currentSort==='fillAsc'?'active':''}" onclick="setSort('fillAsc')">Vélos ↓</div>
+  </div>`;
 
     rows.forEach(r => {
       const pct = r.places > 0 ? Math.round(r.bikes.length / r.places * 100) : 0;
