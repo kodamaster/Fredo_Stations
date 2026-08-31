@@ -12,31 +12,31 @@
   });
   const RADIUS = 50;
   const ZONE_NAMES = {
-    "2888": {nom: "Nation",              places: 6,  numero: 24},
-    "2889": {nom: "Théâtre",             places: 9,  numero: 02},
-    "2890": {nom: "Place d'armes",       places: 6,  numero: 06},
-    "2891": {nom: "Université",          places: 9,  numero: 15},
-    "2893": {nom: "Milieu de digue",     places: 6,  numero: 08},
-    "2937": {nom: "Pluviose",            places: 6,  numero: 07},
-    "2938": {nom: "Camping de Blériot",  places: 6,  numero: 10},
-    "2939": {nom: "Église de Blériot",   places: 6,  numero: 09},
-    "2940": {nom: "Matelote",            places: 3,  numero: 19},
-    "2941": {nom: "Camping de Calais",   places: 3,  numero: 40},
-    "2942": {nom: "Base de voile",       places: 6,  numero: 11},
-    "2943": {nom: "Richelieu",           places: 6,  numero: 05},
-    "2944": {nom: "Diderot",             places: 3,  numero: 22},
-    "2945": {nom: "Pôle administratif",  places: 3,  numero: 13},
-    "2946": {nom: "Cité de la dentelle", places: 3,  numero: 14},
-    "2947": {nom: "Médiathèque",         places: 3,  numero: 66},
-    "2948": {nom: "Condorcet",           places: 6,  numero: 23},
-    "2949": {nom: "Hôtel de ville",      places: 6,  numero: 03},
-    "2950": {nom: "Coubertin",           places: 6,  numero: 21},
-    "2951": {nom: "Piscine Icéo",        places: 6,  numero: 18},
-    "2952": {nom: "Léonard De Vinci",    places: 6,  numero: 46},
-    "2997": {nom: "Gare des Fontinettes",places: 3,  numero: 39},
-    "2998": {nom: "Joffre",              places: 3,  numero: 26},
-    "3004": {nom: "Marck - Schweitzer",  places: 3,  numero: 34},
-    "2905": {nom: "Gare SNCF",           places: 9,  numero: 04}
+    "2888": {nom: "Nation",              places: 6,  numero: 18},
+    "2889": {nom: "Théâtre",             places: 9,  numero: 24},
+    "2890": {nom: "Place d'armes",       places: 6,  numero: 19},
+    "2891": {nom: "Université",          places: 9,  numero: 25},
+    "2893": {nom: "Milieu de digue",     places: 6,  numero: 16},
+    "2937": {nom: "Pluviose",            places: 6,  numero: 20},
+    "2938": {nom: "Camping de Blériot",  places: 6,  numero: 2},
+    "2939": {nom: "Église de Blériot",   places: 6,  numero: 8},
+    "2940": {nom: "Matelote",            places: 3,  numero: 15},
+    "2941": {nom: "Camping de Calais",   places: 3,  numero: 3},
+    "2942": {nom: "Base de voile",       places: 6,  numero: 1},
+    "2943": {nom: "Richelieu",           places: 6,  numero: 23},
+    "2944": {nom: "Diderot",             places: 3,  numero: 7},
+    "2945": {nom: "Pôle administratif",  places: 3,  numero: 21},
+    "2946": {nom: "Cité de la dentelle", places: 3,  numero: 4},
+    "2947": {nom: "Médiathèque",         places: 3,  numero: 16},
+    "2948": {nom: "Condorcet",           places: 6,  numero: 5},
+    "2949": {nom: "Hôtel de ville",      places: 6,  numero: 12},
+    "2950": {nom: "Coubertin",           places: 6,  numero: 6},
+    "2951": {nom: "Piscine Icéo",        places: 6,  numero: 22},
+    "2952": {nom: "Léonard De Vinci",    places: 6,  numero: 13},
+    "2997": {nom: "Gare des Fontinettes",places: 3,  numero: 9},
+    "2998": {nom: "Joffre",              places: 3,  numero: 12},
+    "3004": {nom: "Marck - Schweitzer",  places: 3,  numero: 14},
+    "2905": {nom: "Gare SNCF",           places: 9,  numero: 10}
   };
 
   function centroid(path) {
@@ -66,7 +66,7 @@
   Object.keys(ZONES).forEach(id => counts[id] = []);
 
   Object.entries(bikesCoords).forEach(([coord, ids]) => {
-    const filteredIds = ids.filter(id => id.length === 4 && !activeRentalIds.includes(id));
+    const filteredIds = ids.filter(id => id.length === 4);
     if (filteredIds.length === 0) return;
     const [lat, lng] = coord.split(',').map(Number);
     let bestId = null, bestDist = Infinity;
@@ -75,6 +75,24 @@
       if (d < RADIUS && d < bestDist) { bestDist = d; bestId = id; }
     }
     if (bestId) counts[bestId].push(...filteredIds);
+  });
+
+  function normStation(s) {
+    return (s || '').replace(/^(Départ|Depart)\s*/i, '').trim().toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+
+  const takenPerStation = {};
+  [...clientRentals, ...maintenanceRentals].forEach(r => {
+    const key = normStation(r.station);
+    takenPerStation[key] = (takenPerStation[key] || 0) + 1;
+  });
+
+  Object.entries(ZONES).forEach(([id, z]) => {
+    const taken = takenPerStation[normStation(z.nom)] || 0;
+    if (taken > 0 && counts[id] && counts[id].length > 0) {
+      counts[id] = counts[id].slice(0, Math.max(0, counts[id].length - taken));
+    }
   });
 
   const enStation = Object.entries(counts)
@@ -385,53 +403,4 @@
         : `<span class="dot ok"></span>`;
       const pills = r.bikes.length > 0
         ? r.bikes.map(b => `<span class="pill">${b}</span>`).join('')
-        : `<span style="color:${th.muted};font-size:13px">Aucun vélo</span>`;
-
-      html += `
-    <div class="station">
-      <div class="sh" onclick="toggle('${r.id}')">
-        <div class="sl2">
-          <div class="ico">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${th.accent}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 21s-7-6.1-7-11.5A7 7 0 0119 9.5C19 14.9 12 21 12 21z"/>
-              <circle cx="12" cy="9.5" r="2.5"/>
-            </svg>
-          </div>
-          <div><div class="sn">${r.nom}</div><div class="sm">${r.places} places</div></div>
-        </div>
-        <div class="sr">
-          <div><div class="cn">${r.bikes.length}</div><div class="cb">vélos</div></div>
-          ${badge}
-          <svg id="chev-${r.id}" class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M6 9l6 6 6-6"/>
-          </svg>
-        </div>
-      </div>
-      <div class="sbody" id="body-${r.id}">
-        <div class="bar-row">
-          <div class="bar-bg"><div class="bar-fill" style="width:${Math.min(pct,100)}%;background:${bc}"></div></div>
-          <span class="bpct">${pct}%</span>
-        </div>
-        <div class="blbl">Numéros des vélos</div>
-        <div class="bgrid">${pills}</div>
-      </div>
-    </div>`;
-    });
-
-    html += `</div>`;
-    document.open();
-    document.write(html);
-    document.close();
-
-    // Re-bind openState after re-render
-    Object.entries(openState).forEach(([id, isOpen]) => {
-      if (isOpen) {
-        document.getElementById('body-'+id)?.classList.add('open');
-        const c = document.getElementById('chev-'+id);
-        if (c) c.style.transform = 'rotate(180deg)';
-      }
-    });
-  }
-
-  renderPage();
-})();
+        : `<span style="color:${th.m
