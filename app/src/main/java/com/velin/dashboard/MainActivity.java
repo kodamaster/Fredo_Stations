@@ -19,6 +19,7 @@ public class MainActivity extends Activity {
     private static final String BACKOFFICE = "https://backoffice-fredo-prod.apnl.info";
     private final Handler handler = new Handler();
     private String storedBikesJson = null;
+    private String storedRentalsJson = null;
 
     @SuppressLint({"SetJavaScriptEnabled"})
     @Override
@@ -43,6 +44,14 @@ public class MainActivity extends Activity {
             @android.webkit.JavascriptInterface
             public void showLoading() {
                 showOverlay();
+            }
+
+            @android.webkit.JavascriptInterface
+            public void refreshData() {
+                runOnUiThread(() -> {
+                    showOverlay();
+                    startDataFetch(webView);
+                });
             }
         }, "Android");
 
@@ -91,7 +100,7 @@ public class MainActivity extends Activity {
                     );
                 } else if (url.contains("/clientZones")) {
                     showOverlay();
-                    handler.postDelayed(() -> tryInject(view, 0), 3000);
+                    handler.postDelayed(() -> startDataFetch(view), 400);
                 } else if (url.contains("/client")) {
                     view.loadUrl(BACKOFFICE + "/clientZones/");
                 }
@@ -136,8 +145,28 @@ public class MainActivity extends Activity {
         runOnUiThread(() -> overlay.setVisibility(View.GONE));
     }
 
+    private void startDataFetch(WebView view) {
+        storedBikesJson = null;
+        storedRentalsJson = null;
+        // Zones et locations sont récupérées en parallèle (indépendantes l'une de l'autre)
+        injectRentalsFetchScript(view);
+        pollRentals(view, 0);
+        tryInject(view, 0);
+    }
+
+    private void maybeInjectDashboard(WebView view) {
+        if (storedBikesJson != null && storedRentalsJson != null) {
+            hideOverlay();
+            String bikes = storedBikesJson;
+            String rentals = storedRentalsJson;
+            storedBikesJson = null;
+            storedRentalsJson = null;
+            injectDashboard(view, bikes, rentals);
+        }
+    }
+
     private void tryInject(WebView view, int attempt) {
-        if (attempt > 10) {
+        if (attempt > 20) {
             hideOverlay();
             view.evaluateJavascript(
                 "document.body.style.visibility='visible';" +
@@ -161,15 +190,15 @@ public class MainActivity extends Activity {
             value -> {
                 if (value != null && !value.equals("null") && !value.equals("\"null\"")) {
                     storedBikesJson = value.substring(1, value.length() - 1).replace("\\\"", "\"");
-                    fetchRentalsViaFetch(view);
+                    maybeInjectDashboard(view);
                 } else {
-                    handler.postDelayed(() -> tryInject(view, attempt + 1), 1000);
+                    handler.postDelayed(() -> tryInject(view, attempt + 1), 300);
                 }
             }
         );
     }
 
-    private void fetchRentalsViaFetch(WebView view) {
+    private void injectRentalsFetchScript(WebView view) {
         view.evaluateJavascript(
             "(function(){" +
             "  window.__RENTALS_READY__ = undefined;" +
@@ -237,13 +266,12 @@ public class MainActivity extends Activity {
             "})()",
             null
         );
-        pollRentals(view, 0);
     }
 
     private void pollRentals(WebView view, int attempt) {
-        if (attempt > 20) {
-            hideOverlay();
-            injectDashboard(view, storedBikesJson, "[]");
+        if (attempt > 32) {
+            if (storedRentalsJson == null) storedRentalsJson = "[]";
+            maybeInjectDashboard(view);
             return;
         }
         handler.postDelayed(() -> {
@@ -251,15 +279,14 @@ public class MainActivity extends Activity {
                 "typeof window.__RENTALS_READY__ !== 'undefined' ? window.__RENTALS_READY__ : 'null'",
                 result -> {
                     if (result != null && !result.equals("null") && !result.equals("\"null\"")) {
-                        String cleanRentals = result.substring(1, result.length() - 1).replace("\\\"", "\"");
-                        hideOverlay();
-                        injectDashboard(view, storedBikesJson, cleanRentals);
+                        storedRentalsJson = result.substring(1, result.length() - 1).replace("\\\"", "\"");
+                        maybeInjectDashboard(view);
                     } else {
                         pollRentals(view, attempt + 1);
                     }
                 }
             );
-        }, 500);
+        }, 250);
     }
 
     private void injectDashboard(WebView view, String bikesJson, String rentalsJson) {
