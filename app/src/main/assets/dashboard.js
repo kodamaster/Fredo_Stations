@@ -7,7 +7,7 @@
   const clientRentals = activeRentals.filter(r => r.type !== 'maintenance');
   const maintenanceRentals = activeRentals.filter(r => {
     if (r.type !== 'maintenance') return false;
-      const sc = r.station.replace(/^(Départ|Depart)\s*/i, '').trim();
+      const sc = (r.station || '').replace(/^(Départ|Depart)\s*/i, '').trim();
       return !sc.match(/^-?\d+\.\d+\s+-?\d+\.\d+$/);
   });
   const RADIUS = 50;
@@ -270,7 +270,7 @@
 
   function rentalRows(list, color) {
     return list.map(r => {
-      const stationClean = r.station.replace(/^(D\u00e9part|Depart)\s*/i, '').trim();
+      const stationClean = (r.station || '').replace(/^(D\u00e9part|Depart)\s*/i, '').trim();
       const coordMatch = stationClean.match(/^-?\d+\.\d+\s+-?\d+\.\d+$/);
       const stationLabel = coordMatch ? 'Hors zone' : (stationClean || 'Inconnue');
       return `
@@ -403,4 +403,4 @@
         : `<span class="dot ok"></span>`;
       const pills = r.bikes.length > 0
         ? r.bikes.map(b => `<span class="pill">${b}</span>`).join('')
-        : `<span style="color:${th.m
+        : `<span sty
