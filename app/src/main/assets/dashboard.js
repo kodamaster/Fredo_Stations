@@ -1,5 +1,5 @@
-
 (function(){
+ try {
   const bikes = __DATA__.b;
   const zonesRaw = bikes.zones;
   const bikesCoords = bikes.bikes;
@@ -404,4 +404,64 @@
         : `<span class="dot ok"></span>`;
       const pills = r.bikes.length > 0
         ? r.bikes.map(b => `<span class="pill">${b}</span>`).join('')
-        : `<span sty
+        : `<span style="color:${th.muted};font-size:13px">Aucun vélo</span>`;
+
+      html += `
+    <div class="station">
+      <div class="sh" onclick="toggle('${r.id}')">
+        <div class="sl2">
+          <div class="ico">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${th.accent}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 21s-7-6.1-7-11.5A7 7 0 0119 9.5C19 14.9 12 21 12 21z"/>
+              <circle cx="12" cy="9.5" r="2.5"/>
+            </svg>
+          </div>
+          <div><div class="sn">${r.nom}</div><div class="sm">${r.places} places</div></div>
+        </div>
+        <div class="sr">
+          <div><div class="cn">${r.bikes.length}</div><div class="cb">vélos</div></div>
+          ${badge}
+          <svg id="chev-${r.id}" class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </div>
+      </div>
+      <div class="sbody" id="body-${r.id}">
+        <div class="bar-row">
+          <div class="bar-bg"><div class="bar-fill" style="width:${Math.min(pct,100)}%;background:${bc}"></div></div>
+          <span class="bpct">${pct}%</span>
+        </div>
+        <div class="blbl">Numéros des vélos</div>
+        <div class="bgrid">${pills}</div>
+      </div>
+    </div>`;
+    });
+
+    html += `</div>`;
+    document.open();
+    document.write(html);
+    document.close();
+
+    // Re-bind openState after re-render
+    Object.entries(openState).forEach(([id, isOpen]) => {
+      if (isOpen) {
+        document.getElementById('body-'+id)?.classList.add('open');
+        const c = document.getElementById('chev-'+id);
+        if (c) c.style.transform = 'rotate(180deg)';
+      }
+    });
+  }
+
+  renderPage();
+ } catch (e) {
+  document.open();
+  document.write(
+    '<body style="background:#0d0f14;color:#fff;font-family:monospace;' +
+    'padding:20px;font-size:13px;white-space:pre-wrap;line-height:1.5">' +
+    '⚠️ Erreur dashboard :\n\n' + (e && e.message ? e.message : e) +
+    '\n\n' + (e && e.stack ? e.stack : '') +
+    '</body>'
+  );
+  document.close();
+ }
+})();
