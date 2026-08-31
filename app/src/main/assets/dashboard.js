@@ -247,8 +247,14 @@
   window.toggle = toggle;
 
   window.reload = () => {
-    if(typeof Android !== 'undefined') Android.showLoading();
-    window.location.reload();
+    if (typeof Android !== 'undefined' && Android.refreshData) {
+      Android.refreshData();
+    } else if (typeof Android !== 'undefined') {
+      Android.showLoading();
+      window.location.reload();
+    } else {
+      window.location.reload();
+    }
   };
 
   let currentSort = (typeof Android !== 'undefined' && Android.getSort)
