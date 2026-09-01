@@ -50,7 +50,9 @@ public class MainActivity extends Activity {
             public void refreshData() {
                 runOnUiThread(() -> {
                     showOverlay();
-                    startDataFetch(webView);
+                    // On recharge la page clientZones pour forcer le site à récupérer
+                    // des positions de vélos fraîches (la session reste active, pas de re-login).
+                    webView.loadUrl(BACKOFFICE + "/clientZones/");
                 });
             }
         }, "Android");
