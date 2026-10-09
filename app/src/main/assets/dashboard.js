@@ -18,6 +18,7 @@
     "2890": {nom: "Place d'armes",       places: 6,  numero: 06},
     "2891": {nom: "Université",          places: 9,  numero: 15},
     "2893": {nom: "Milieu de digue",     places: 6,  numero: 08},
+    "2905": {nom: "Gare SNCF",           places: 9,  numero: 04},
     "2937": {nom: "Pluviose",            places: 6,  numero: 07},
     "2938": {nom: "Camping de Blériot",  places: 6,  numero: 10},
     "2939": {nom: "Église de Blériot",   places: 6,  numero: 09},
@@ -37,7 +38,18 @@
     "2997": {nom: "Gare des Fontinettes",places: 3,  numero: 39},
     "2998": {nom: "Joffre",              places: 3,  numero: 26},
     "3004": {nom: "Marck - Schweitzer",  places: 3,  numero: 34},
-    "2905": {nom: "Gare SNCF",           places: 9,  numero: 04}
+    "3024": {nom: "Bitche",              places: 3,  numero: 71},
+    "3026": {nom: "Lycée Berthelot",     places: 9,  numero: 16},
+    "3027": {nom: "Coulogne Eglise",     places: 3,  numero: 34},
+    "3028": {nom: "Coulogne Marronniers",places: 3,  numero: 35},
+    "3029": {nom: "Montréal",            places: 3,  numero: 31},
+    "3030": {nom: "Mogador",             places: 3,  numero: 17},
+    "3031": {nom: "CC La Française",     places: 3,  numero: 12},
+    "3032": {nom: "Coquelles - Charles de Gaulle", places: 3,  numero: 28},
+    "3033": {nom: "Sapins",              places: 3,  numero: 90},
+    "3034": {nom: "Copernic",            places: 3,  numero: 25},
+    "3035": {nom: "Saint Pierre Halte",  places: 3,  numero: 68},
+    "3036": {nom: "Hôpital",             places: 3,  numero: 39}
   };
 
   function centroid(path) {
