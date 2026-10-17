@@ -40,16 +40,26 @@
     "3004": {nom: "Marck - Schweitzer",  places: 3,  numero: 34},
     "3024": {nom: "Bitche",              places: 3,  numero: 71},
     "3026": {nom: "Lycée Berthelot",     places: 9,  numero: 16},
-    "3027": {nom: "Coulogne Eglise",     places: 3,  numero: 34},
-    "3028": {nom: "Coulogne Marronniers",places: 3,  numero: 35},
-    "3029": {nom: "Montréal",            places: 3,  numero: 31},
+    "3027": {nom: "Coulogne Eglise",     places: 3,  numero: 30},
+    "3028": {nom: "Coulogne Marronniers",places: 3,  numero: 31},
+    "3029": {nom: "Montréal",            places: 3,  numero: 27},
     "3030": {nom: "Mogador",             places: 3,  numero: 17},
     "3031": {nom: "CC La Française",     places: 3,  numero: 12},
     "3032": {nom: "Coquelles - Charles de Gaulle", places: 3,  numero: 28},
-    "3033": {nom: "Sapins",              places: 3,  numero: 90},
+    "3033": {nom: "Sapins",              places: 3,  numero: 82},
     "3034": {nom: "Copernic",            places: 3,  numero: 25},
     "3035": {nom: "Saint Pierre Halte",  places: 3,  numero: 68},
-    "3036": {nom: "Hôpital",             places: 3,  numero: 39}
+    "3036": {nom: "Hôpital",             places: 3,  numero: 35},
+    "3046": {nom: "Julien Denis",        places: 3,  numero: 64},
+    "3047": {nom: "Renoir",              places: 3,  numero: 48},
+    "3048": {nom: "Greuze",              places: 3,  numero: 70},
+    "3049": {nom: "IUT",                 places: 3,  numero: 20},
+    "3050": {nom: "Quai de la Loire",    places: 3,  numero: 41},
+    "3051": {nom: "Terminal Transmanche",places: 3,  numero: 42},
+    "3052": {nom: "Terminal Ferry",      places: 3,  numero: 54},
+    "3053": {nom: "Le Fort Vert",        places: 3,  numero: 77},
+    "3054": {nom: "Garennes",            places: 3,  numero: 44},
+    "3055": {nom: "Les Oyats",           places: 3,  numero: 72}
   };
 
   function centroid(path) {
