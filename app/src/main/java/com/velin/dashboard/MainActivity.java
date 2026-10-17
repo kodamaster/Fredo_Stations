@@ -102,7 +102,7 @@ public class MainActivity extends Activity {
                     );
                 } else if (url.contains("/clientZones")) {
                     showOverlay();
-                    handler.postDelayed(() -> startDataFetch(view), 400);
+                    handler.postDelayed(() -> startDataFetch(view), 800);
                 } else if (url.contains("/client")) {
                     view.loadUrl(BACKOFFICE + "/clientZones/");
                 }
@@ -168,7 +168,7 @@ public class MainActivity extends Activity {
     }
 
     private void tryInject(WebView view, int attempt) {
-        if (attempt > 20) {
+        if (attempt > 60) {
             hideOverlay();
             view.evaluateJavascript(
                 "document.body.style.visibility='visible';" +
@@ -194,7 +194,7 @@ public class MainActivity extends Activity {
                     storedBikesJson = value.substring(1, value.length() - 1).replace("\\\"", "\"");
                     maybeInjectDashboard(view);
                 } else {
-                    handler.postDelayed(() -> tryInject(view, attempt + 1), 300);
+                    handler.postDelayed(() -> tryInject(view, attempt + 1), 500);
                 }
             }
         );
@@ -271,7 +271,7 @@ public class MainActivity extends Activity {
     }
 
     private void pollRentals(WebView view, int attempt) {
-        if (attempt > 32) {
+        if (attempt > 60) {
             if (storedRentalsJson == null) storedRentalsJson = "[]";
             maybeInjectDashboard(view);
             return;
@@ -288,7 +288,7 @@ public class MainActivity extends Activity {
                     }
                 }
             );
-        }, 250);
+        }, 500);
     }
 
     private void injectDashboard(WebView view, String bikesJson, String rentalsJson) {
